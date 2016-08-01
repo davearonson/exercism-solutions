@@ -18,8 +18,22 @@ defmodule Phone do
   """
   @spec number(String.t) :: String.t
   def number(raw) do
-
+    do_number(String.graphemes(raw))
   end
+
+  defp do_number([]), do: ""
+
+  defp do_number([first|rest]) do
+    "#{digit_value(first)}#{do_number(rest)}"
+  end
+
+  defp digit_value(char) do
+    cond do
+      (char >= "0" && char <= "9") -> char
+      true -> ""
+    end
+  end
+
 
   @doc """
   Extract the area code from a phone number
