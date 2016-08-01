@@ -18,21 +18,33 @@ defmodule Phone do
   """
   @spec number(String.t) :: String.t
   def number(raw) do
-    do_number(String.graphemes(raw))
+    validate_length(do_number(String.graphemes(raw)))
   end
+
+  @bad_number "0000000000"
 
   defp do_number([]), do: ""
 
-  defp do_number([first|rest]) do
-    "#{digit_value(first)}#{do_number(rest)}"
-  end
+  defp do_number([first|rest]), do: "#{digit_value(first)}#{do_number(rest)}"
 
-  defp digit_value(char) do
-    cond do
-      (char >= "0" && char <= "9") -> char
-      true -> ""
+  # too bad ranges are only for integers :-P
+  defp digit_value(char) when char >= "0" and char <= "9", do: char
+  defp digit_value(char) when char >= "a" and char <= "z", do: "0"
+  defp digit_value(_), do: ""
+
+  defp validate_length(str), do: do_validate_length(str, String.length(str))
+
+  defp do_validate_length(str, 10), do: str
+
+  defp do_validate_length(str, 11) do
+    # String.first is not allowed in guards, and ["1"|rest] is not valid :-P
+    case String.first(str) do
+      "1" -> String.slice(str, 1, 10)
+      _   -> @bad_number
     end
   end
+
+  defp do_validate_length(_, _), do: @bad_number
 
 
   @doc """
@@ -54,8 +66,9 @@ defmodule Phone do
   """
   @spec area_code(String.t) :: String.t
   def area_code(raw) do
-  
+    String.slice(number(raw), 0, 3)
   end
+
 
   @doc """
   Pretty print a phone number
@@ -76,6 +89,11 @@ defmodule Phone do
   """
   @spec pretty(String.t) :: String.t
   def pretty(raw) do
-  
+    do_pretty(number(raw))
   end
+
+  defp do_pretty(num) do
+    "(#{String.slice(num, 0..2)}) #{String.slice(num, 3..5)}-#{String.slice(num, 6..9)}"
+  end
+
 end
