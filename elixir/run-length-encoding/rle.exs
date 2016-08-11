@@ -25,12 +25,16 @@ defmodule RunLengthEncoder do
 
   defp do_encode([], acc, count, char), do: final_acc(acc, count, char)
 
+  defp do_encode([head|tail], acc, 0, _) do
+    do_encode(tail, acc, 1, head)
+  end
+
+  defp do_encode([head|tail], acc, count, head) do
+    do_encode(tail, acc, count + 1, head)
+  end
+
   defp do_encode([head|tail], acc, count, char) do
-    if head == char || count == 0 do
-      do_encode(tail, acc, count + 1, head)
-    else
-      do_encode(tail, final_acc(acc, count, char), 1, head)
-    end
+    do_encode(tail, final_acc(acc, count, char), 1, head)
   end
 
 
@@ -42,9 +46,9 @@ defmodule RunLengthEncoder do
   defp reconstitute(encoded) do
     String.duplicate(String.last(encoded),
                      Regex.scan(~r/^\d+/, encoded)
-                       # there should be a better way to do this
-                       |> Enum.at(0) |> Enum.at(0)
-                       |> String.to_integer)
+                     # there should be a better way to do this, like .at(0,0)
+                     |> Enum.at(0) |> Enum.at(0)
+                     |> String.to_integer)
   end
 
 end
