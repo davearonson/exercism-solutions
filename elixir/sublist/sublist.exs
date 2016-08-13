@@ -12,8 +12,8 @@ defmodule Sublist do
     end
   end
 
-  defp is_sublist?(_, []   ), do: false
-  defp is_sublist?(sub, [head|tail]) do
+  defp is_sublist?(_,   []         ), do: false
+  defp is_sublist?(sub, [head|tail])  do
     case is_sublist_here?(sub, [head|tail]) do
       false    -> is_sublist?(sub, tail)
       :no_room -> false
