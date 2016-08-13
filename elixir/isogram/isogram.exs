@@ -9,9 +9,14 @@ defmodule Isogram do
                %{})
   end
 
-  defp repeats?([],          _),    do: false
-  defp repeats?([char|rest], sofar) do
-    if sofar[char], do: true, else: repeats?(rest, Map.put(sofar, char, true))
+  defp repeats?([],          _    ), do: false
+  defp repeats?([char|rest], sofar)  do
+    # TRIED to do this w/ a guard but couldn't figure out how
+    if sofar[char] do
+      true
+    else
+      repeats?(rest, Map.put(sofar, char, true))
+    end
   end
 
 end
