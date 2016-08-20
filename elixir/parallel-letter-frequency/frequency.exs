@@ -14,24 +14,24 @@ defmodule Frequency do
   defp do_frequency(texts, workers) do
     texts
     |> Enum.join("\n")
-    |> String.split("\n")  # so we wind up with a big array of lines to split up
-    |> break_up(workers, 0, {})
+    |> String.split("\n")
+    |> split_among(workers, 0, {})
     |> spawn_workers(self, [])
     |> Enum.map(&get_results/1)
     |> Enum.reduce(%{}, &combine_results/2)
   end
 
-  defp break_up([], _, _, acc), do: Tuple.to_list(acc)
+  defp split_among([], _, _, acc), do: Tuple.to_list(acc)
 
-  defp break_up([text|more], workers, cur, acc) when cur < workers do
-    break_up(more, workers, rem(cur + 1, workers), Tuple.append(acc, text))
+  defp split_among([hd|tl], workers, cur, acc) when tuple_size(acc) < workers do
+    split_among(tl, workers, rem(cur + 1, workers), Tuple.append(acc, hd))
   end
 
-  defp break_up([text|more], workers, cur, acc) do
-    break_up(more,
-             workers,
-             rem(cur+1, workers),
-             put_elem(acc, cur, elem(acc, cur) <> text))
+  defp split_among([hd|tl], workers, cur, acc) do
+    split_among(tl,
+                workers,
+                rem(cur + 1, workers),
+                put_elem(acc, cur, elem(acc, cur) <> hd))
   end
 
   defp spawn_workers([], _, acc), do: acc
