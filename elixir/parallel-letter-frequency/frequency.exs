@@ -13,8 +13,7 @@ defmodule Frequency do
 
   defp do_frequency(texts, workers) do
     texts
-    |> Enum.join("\n")
-    |> String.split("\n")
+    |> Enum.flat_map(&(String.split(&1, "\n")))
     |> split_among(workers, 0, {})
     |> spawn_workers(self, [])
     |> Enum.map(&get_results/1)
@@ -24,33 +23,32 @@ defmodule Frequency do
   defp split_among([], _, _, acc), do: Tuple.to_list(acc)
 
   defp split_among([hd|tl], workers, cur, acc) when tuple_size(acc) < workers do
-    split_among(tl, workers, rem(cur + 1, workers), Tuple.append(acc, hd))
+    split_among(tl, workers, rem(cur + 1, workers), Tuple.append(acc, [hd]))
   end
 
   defp split_among([hd|tl], workers, cur, acc) do
     split_among(tl,
                 workers,
                 rem(cur + 1, workers),
-                put_elem(acc, cur, elem(acc, cur) <> hd))
+                put_elem(acc, cur, [hd | elem(acc, cur)]))
   end
 
   defp spawn_workers([], _, acc), do: acc
-  defp spawn_workers([text|more], caller, acc) do
-    spawn_workers(more, caller, [spawn(fn -> analyze(text, caller) end) | acc])
+  defp spawn_workers([lines|more], caller, acc) do
+    spawn_workers(more, caller, [spawn(fn -> analyze(lines, caller) end) | acc])
   end
 
-  defp analyze(text, caller) do
+  defp analyze(lines, caller) do
     send(caller,
-         text
+         lines
+         |> Enum.join
          |> String.downcase
-         |> String.graphemes
-         |> Enum.filter(&is_letter?/1)
-         |> Enum.reduce(%{}, &count_char/2)
-   )
+         |> get_letters
+         |> Enum.reduce(%{}, &count_char/2))
   end
 
-  defp is_letter?(char) do
-    char =~ ~r/^\pL$/u
+  defp get_letters(text) do
+    Regex.scan(~r/\pL/u, text) |> List.flatten
   end
 
   defp count_char(char, acc) do
