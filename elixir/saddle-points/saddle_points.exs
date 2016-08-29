@@ -35,34 +35,38 @@ defmodule Matrix do
   """
   @spec saddle_points(String.t()) :: [{integer, integer}]
   def saddle_points(str) do
-    rows = rows(str)
-    columns = columns(str)  # more efficient to derive from rows, but....
-    row_maxes = find_candidates(rows, &find_max/1)
-    IO.puts "\nrow_maxes = #{inspect row_maxes}"
-    col_mins = find_candidates(columns, &find_min/1)
-    IO.puts "\ncol_mins = #{inspect col_mins}"
-    MapSet.intersection(col_mins, row_maxes) |> MapSet.to_list
+    MapSet.intersection(find_candidates(rows(str),
+                                        &Enum.max/1,
+                                        &itself/1),
+                        # would more efficient to derive from memoized rows
+                        find_candidates(columns(str),
+                                        &Enum.min/1,
+                                        &reverse_tuple/1))
+    |> MapSet.to_list
   end
 
-  defp find_candidates(metalist, extreme_finder) do
-    metalist |> Enum.with_index
-             |> Enum.map(extreme_finder)
-             |> List.flatten
-             |> Enum.into(%MapSet{})
+  # "view" meaning, the array of arrays, be it by rows or columns
+  defp find_candidates(view, extreme_finder, loc_maker) do
+    view |> Enum.with_index
+         |> Enum.flat_map(&(make_extreme_locs(&1,
+                                              extreme_finder,
+                                              loc_maker)))
+         |> Enum.into(%MapSet{})
   end
 
-  defp find_max({row, row_num}) do
-    val = Enum.max(row)
-    row |> Enum.with_index
-        |> Enum.filter(&(elem(&1, 0) == val))
-        |> Enum.map(&({row_num, elem(&1, 1)}))
+  defp make_extreme_locs(list_with_index, extreme_finder, loc_maker) do
+    # assignments just to memoize and simplify....
+    vals = elem(list_with_index, 0)
+    extreme = apply(extreme_finder, [vals])
+    list_num = elem(list_with_index, 1)
+    vals |> Enum.with_index
+         |> Enum.filter(&(elem(&1, 0) == extreme))
+         |> Enum.map(&(apply(loc_maker, [{list_num, elem(&1, 1)}])))
+
   end
 
-  defp find_min({col, col_num}) do
-    val = Enum.min(col)
-    col |> Enum.with_index
-        |> Enum.filter(&(elem(&1, 0) == val))
-        |> Enum.map(&({elem(&1, 1), col_num}))
-  end
+  defp itself(whatever), do: whatever
+
+  defp reverse_tuple({col, row}), do: {row, col}
 
 end
