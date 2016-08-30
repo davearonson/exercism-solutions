@@ -11,7 +11,7 @@ defmodule Diamond do
     top_half = quarter |> Enum.zip(quarter_reversed)
                        |> Enum.map(&("#{elem(&1,0)}#{elem(&1,1)}"))
     bottom_half = top_half |> Enum.reverse |> Enum.drop(1)
-    (top_half ++ bottom_half ++ [""]) |> Enum.join("\n")
+    "#{Enum.join(top_half ++ bottom_half, "\n")}\n"
   end
 
   defp make_quarter_line(cur, max) do
