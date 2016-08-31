@@ -46,4 +46,9 @@ defmodule ChangeTest do
     assert Change.generate(-25, [5, 10, 25]) == :error
   end
 
+  test "generates correct change if leftovers from largest not multiple of any of rest" do
+    change = %{2 => 1, 3 => 1, 100 => 1}
+    assert Change.generate(105, [2, 3, 100]) == {:ok, change}
+  end
+
 end
