@@ -19,16 +19,13 @@ defmodule Change do
   def generate(amount, _     ) when amount <= 0, do: :error
   def generate(_     , []    )                 , do: :error
   def generate(amount, values) do
-    do_generate(amount, values |> Enum.sort |> Enum.reverse, %{})
+    do_generate(amount,
+                values |> Enum.sort |> Enum.reverse,
+                %{}) || :error
   end
 
-  # put zero case BEFORE no-values case 'cuz it's more likely, and
-  # if we have both, we most likely came there directly (trying to
-  # make zero change), so empty makes more sense than error.
-
-  defp do_generate(0, _, sofar), do: {:ok, sofar}
-
-  defp do_generate(_, [], _), do: :error
+  defp do_generate(0, _ , sofar), do: {:ok, sofar}
+  defp do_generate(_, [], _    ), do: false
 
   defp do_generate(amount, [largest|rest], sofar) when largest > amount do
     do_generate(amount, rest,
@@ -37,17 +34,14 @@ defmodule Change do
 
   defp do_generate(amount, [largest|rest], sofar)  do
     # TODO MAYBE: see if we can preserve tail-call optimization somehow?
-    result = do_generate(amount - largest, [largest|rest],
-                         Map.put(sofar, largest,
-                                 Map.get(sofar, largest, 0) + 1))
-    # depending what exact coins we have, applying the largest one
-    # may give us something we can't do with the rest of them!
-    if result == :error do
-      do_generate(amount, rest,
-                  Map.put(sofar, largest, Map.get(sofar, largest, 0)))
-    else
-      result
-    end
+    do_generate(amount - largest,
+                [largest|rest],
+                Map.put(sofar, largest,
+                        Map.get(sofar, largest, 0) + 1))
+      # depending what exact coins we have, applying the largest one
+      # may give us something we can't do with the rest of them!
+    || do_generate(amount, rest,
+                   Map.put(sofar, largest, Map.get(sofar, largest, 0)))
   end
 
 end
