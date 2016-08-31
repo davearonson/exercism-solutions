@@ -13,14 +13,17 @@ defmodule Raindrops do
   """
   @spec convert(pos_integer) :: String.t
   def convert(number) do
-    ( Map.keys(@noises)
-      |> Enum.filter(&(rem(number, &1) == 0))
-      |> Enum.map(&(@noises[&1]))
-      |> Enum.join
-      |> presence) || "#{number}"
+    make_noises(number) || Integer.to_string(number)
   end
 
-  def presence(""), do: nil
-  def presence(str), do: str
+  defp make_noises(number) do
+    Map.keys(@noises)
+    |> Enum.filter(&(rem(number, &1) == 0))
+    |> Enum.map_join(&(@noises[&1]))
+    |> presence
+  end
+
+  defp presence("" ), do: nil
+  defp presence(str), do: str
 
 end
