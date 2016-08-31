@@ -1,3 +1,6 @@
+# Thanks to exercism.io / github.com user veelenga for
+# telling me about map_join and reminding me of "pinned" matching.
+
 defmodule Queens do
   @type t :: %Queens{ black: {integer, integer}, white: {integer, integer} }
   defstruct black: nil, white: nil
@@ -17,18 +20,18 @@ defmodule Queens do
   """
   @spec to_string(Queens.t()) :: String.t()
   def to_string(queens) do
-    (0..7) |> Enum.map(&(row(&1, queens))) |> Enum.join("\n")
+    (0..7) |> Enum.map_join("\n", &(row(&1, queens)))
   end
 
   def row(row, queens) do
-    (0..7) |> Enum.map(&(cell(row, &1, queens))) |> Enum.join(" ")
+    (0..7) |> Enum.map_join(" ", &(cell(row, &1, queens)))
   end
 
-  def cell(row, col, queens) do
-    cond do
-      queens.white == { row, col } -> "W"
-      queens.black == { row, col } -> "B"
-      true                         -> "_"
+  def cell(row, col, %{black: black_loc, white: white_loc}) do
+    case {row, col} do
+      ^black_loc -> "B"
+      ^white_loc -> "W"
+      _          -> "_"
     end
   end
 
