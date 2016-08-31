@@ -17,10 +17,10 @@ defmodule Raindrops do
   end
 
   defp make_noises(number) do
-    Map.keys(@noises)
-    |> Enum.filter(&(rem(number, &1) == 0))
-    |> Enum.map_join(&(@noises[&1]))
-    |> presence
+    @noises |> Map.keys
+            |> Enum.filter(&(rem(number, &1) == 0))
+            |> Enum.map_join(&(@noises[&1]))
+            |> presence
   end
 
   defp presence("" ), do: nil
