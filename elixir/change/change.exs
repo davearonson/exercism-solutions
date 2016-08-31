@@ -38,8 +38,8 @@ defmodule Change do
                 [largest|rest],
                 Map.put(sofar, largest,
                         Map.get(sofar, largest, 0) + 1))
-      # depending what exact coins we have, applying the largest one
-      # may give us something we can't do with the rest of them!
+    # depending what exact coins we have, applying the largest one
+    # may give us something we can't do with the rest of them!
     || do_generate(amount, rest,
                    Map.put(sofar, largest, Map.get(sofar, largest, 0)))
   end
