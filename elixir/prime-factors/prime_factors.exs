@@ -20,9 +20,15 @@ defmodule PrimeFactors do
 
   def do_factors_for(candidate, number, limit, primes, acc, known_prime \\ false) do
     if known_prime || is_prime?(candidate, trunc(:math.sqrt(candidate)), primes) do
-      primes = if known_prime, do: primes, else: primes ++ [candidate]  # slow, but rare
+      # ++ is slow, but we should only have to do it rarely
+      primes = if known_prime, do: primes, else: primes ++ [candidate]
       if rem(number, candidate) == 0 do
-        do_factors_for(candidate, trunc(number/candidate), limit, primes, [candidate|acc], true)
+        new_number = trunc(number/candidate)
+        do_factors_for(candidate,
+                       new_number,
+                       trunc(:math.sqrt(new_number)),
+                       primes,
+                       [candidate|acc], true)
       else
         do_factors_for(candidate + 1, number, limit, primes, acc)
       end
