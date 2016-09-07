@@ -9,24 +9,24 @@ defmodule Atbash do
   """
   @spec encode(String.t) :: String.t
   def encode(plaintext) do
-    letters = "abcdefghijklmnopqrstuvwxyz"
-    digits = "0123456789"
-    clear = "#{letters}#{digits}"
-    cypher = "#{String.reverse(letters)}#{digits}"
-    transform = make_transform(String.graphemes(clear),
-                               String.graphemes(cypher),
-                              %{})
     Regex.scan(~r/[a-zA-Z0-9]/, plaintext |> String.downcase)
     |> Enum.map(&List.first/1)
-    |> Enum.map(&(transform[&1]))
+    |> Enum.map(&(transform(&1)))
     |> Enum.chunk(5, 5, [])
     |> Enum.map(&Enum.join/1)
     |> Enum.join(" ")
   end
 
-  defp make_transform([clear|more_clear], [cypher|more_cypher], acc) do
-    make_transform(more_clear, more_cypher, Map.put(acc, clear, cypher))
+  defp transform(char) do
+    cond do
+      Regex.match?(~r/[a-z]/, char) ->
+        [?z + ?a - (char |> to_charlist |> List.first)]
+      Regex.match?(~r/[0-9]/, char) ->
+        char
+      true ->
+        IO.puts "Transforming #{inspect char}"
+        raise ArgumentError
+    end
   end
-  defp make_transform([], [], acc), do: acc
 
 end
