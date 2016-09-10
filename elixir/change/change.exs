@@ -21,27 +21,28 @@ defmodule Change do
   def generate(amount, values) do
     do_generate(amount,
                 values |> Enum.sort |> Enum.reverse,
-                %{}) || :error
+                # thanks to exercism.io user MatthewMDavis
+                # for the idea of prepopulating the map with zeroes;
+                # that vastly simplified the do_generate code!
+                (Enum.map(values, &({&1, 0})) |> Enum.into(%{})))
+    || :error
   end
 
   defp do_generate(0, _ , sofar), do: {:ok, sofar}
   defp do_generate(_, [], _    ), do: false
 
   defp do_generate(amount, [largest|rest], sofar) when largest > amount do
-    do_generate(amount, rest,
-                Map.put(sofar, largest, Map.get(sofar, largest, 0)))
+    do_generate(amount, rest, sofar)
   end
 
   defp do_generate(amount, [largest|rest], sofar)  do
     # TODO MAYBE: see if we can preserve tail-call optimization somehow?
     do_generate(amount - largest,
                 [largest|rest],
-                Map.put(sofar, largest,
-                        Map.get(sofar, largest, 0) + 1))
+                %{sofar | largest => sofar[largest] + 1})
     # depending what exact coins we have, applying the largest one
     # may give us something we can't do with the rest of them!
-    || do_generate(amount, rest,
-                   Map.put(sofar, largest, Map.get(sofar, largest, 0)))
+    || do_generate(amount, rest, sofar)
   end
 
 end
