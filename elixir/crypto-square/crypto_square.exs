@@ -19,6 +19,8 @@ defmodule CryptoSquare do
     |> Enum.join(" ")
   end
 
+  # could start at {1,1}, but this lets us skip past
+  # solutions that are obviously too small
   defp best_size(len) do
     root = trunc(:math.sqrt(len))
     best_size(len, {root,root})
@@ -33,9 +35,10 @@ defmodule CryptoSquare do
 
   # normal zip stops at the first empty one, and this one doesn't,
   # plus it skips the conversion from nested tuples to one list.
-  defp my_zip(one    , two), do: my_zip(one, two, [])
+  defp my_zip(one    , two    , acc \\ [])
   defp my_zip([]     , []     , acc), do: acc |> Enum.reverse
   defp my_zip([h1|t1], [h2|t2], acc), do: my_zip(t1, t2, [[h1,h2]|acc])
   defp my_zip([h1|t1], []     , acc), do: my_zip(t1, [], [h1|acc])
+  # don't need a "first list is empty" clause in this exercise
 
 end
