@@ -29,7 +29,7 @@ defmodule CryptoSquare do
   defp best_size(len, {rows, rows}), do: best_size(len, {rows , rows+1})
   defp best_size(len, {rows, cols}), do: best_size(len, {rows+1, cols})
 
-  defp zip_all([next|rest]), do: zip_all(rest, next)
+  defp zip_all(lists      , acc \\ [])
   defp zip_all([]         , acc), do: acc
   defp zip_all([next|rest], acc), do: zip_all(rest, my_zip(acc, next))
 
@@ -39,6 +39,6 @@ defmodule CryptoSquare do
   defp my_zip([]     , []     , acc), do: acc |> Enum.reverse
   defp my_zip([h1|t1], [h2|t2], acc), do: my_zip(t1, t2, [[h1,h2]|acc])
   defp my_zip([h1|t1], []     , acc), do: my_zip(t1, [], [h1|acc])
-  # don't need a "first list is empty" clause in this exercise
+  defp my_zip([]     , [h2|t2], acc), do: my_zip([], t2, [h2|acc])
 
 end
