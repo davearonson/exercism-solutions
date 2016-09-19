@@ -24,7 +24,7 @@ defmodule Change do
                 # thanks to exercism.io user MatthewMDavis
                 # for the idea of prepopulating the map with zeroes;
                 # that vastly simplified the do_generate code!
-                (Enum.map(values, &({&1, 0})) |> Enum.into(%{})))
+                Map.new(values, &({&1, 0})))
     || :error
   end
 
