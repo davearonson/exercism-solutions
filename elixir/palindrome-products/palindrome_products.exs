@@ -21,8 +21,7 @@ defmodule Palindromes do
   defp revise_accumulator(cur1, cur2, acc) do
     product = cur1 * cur2
     if palindrome?(Integer.to_string(product)) do
-      old = Map.get(acc, product, [])
-      Map.put(acc, product, [[cur1, cur2] | old])
+      Map.put(acc, product, [[cur1, cur2] | Map.get(acc, product, [])])
     else
       acc
     end
