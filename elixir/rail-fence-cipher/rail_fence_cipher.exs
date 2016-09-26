@@ -4,17 +4,20 @@ defmodule RailFenceCipher do
   """
   @spec encode(String.t, pos_integer) :: String.t
   def encode(str, rails) do
-    count_up = 1..rails
-    cycle = if rails > 2 do
-              Enum.concat(count_up, (rails - 1)..2)
-            else
-              count_up
-            end
-    cycle
-    |> Stream.cycle
+    make_cycle(rails)
     |> Enum.zip(String.graphemes(str))
     |> encode_rails(%{})
     |> Enum.join
+  end
+
+  defp make_cycle(rails) do
+    count_up = 1..rails
+    if rails > 2 do
+      Enum.concat(count_up, (rails - 1)..2)
+    else
+      count_up
+    end
+    |> Stream.cycle
   end
 
   defp encode_rails([{rail,char}|more], acc) do
@@ -57,17 +60,20 @@ defmodule RailFenceCipher do
 
   defp prep_rails(chars, cur_rail_num, max_rail, cycles, cycle_size, leftover, acc)  do
     # last rail will TRY to take double portion, but only single is left
-    rail_len = (if cur_rail_num > 0, do: cycles * 2, else: cycles) +
-               cond do
-                 leftover < cur_rail_num + 1          -> 0
-                 leftover < cycle_size - cur_rail_num -> 1
-                 true                                 -> 2
-               end
+    rail_len = calc_rail_len(cur_rail_num, cycles, cycle_size, leftover)
     prep_rails(chars |> Enum.drop(rail_len),
                cur_rail_num + 1, max_rail, cycles, cycle_size, leftover,
                Map.put(acc, cur_rail_num, chars |> Enum.take(rail_len)))
   end
 
+  defp calc_rail_len(cur_rail_num, cycles, cycle_size, leftover) do
+    (if cur_rail_num > 0, do: cycles * 2, else: cycles) +
+    cond do
+      leftover < cur_rail_num + 1          -> 0
+      leftover < cycle_size - cur_rail_num -> 1
+      true                                 -> 2
+    end
+  end
 
   defp decode_rails(rail_map, _, _, acc) when rail_map == %{}, do: acc
 
