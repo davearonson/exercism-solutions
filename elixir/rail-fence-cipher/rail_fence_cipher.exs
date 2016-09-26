@@ -3,23 +3,22 @@ defmodule RailFenceCipher do
   Encode a given plaintext to the corresponding rail fence ciphertext
   """
   @spec encode(String.t, pos_integer) :: String.t
-  def encode(str, 1    ), do: str
   def encode(str, rails) do
-    if String.length(str) <= rails do
-      str
-    else
-      count_up = 1..rails
-      cycle = if rails > 2 do
-                Enum.concat(count_up, (rails - 1)..2)
-              else
-                count_up
-              end
-      cycle
-      |> Stream.cycle
-      |> Enum.zip(String.graphemes(str))
-      |> encode_rails(%{})
-      |> Enum.join
-    end
+    count_up = 1..rails
+    cycle = if rails > 2 do
+              Enum.concat(count_up, (rails - 1)..2)
+            else
+              count_up
+            end
+    cycle
+    |> Stream.cycle
+    |> Enum.zip(String.graphemes(str))
+    |> encode_rails(%{})
+    |> Enum.join
+  end
+
+  defp encode_rails([{rail,char}|more], acc) do
+    encode_rails(more, Map.put(acc, rail, [char|Map.get(acc, rail, [])]))
   end
 
   defp encode_rails([], acc) do
@@ -29,9 +28,6 @@ defmodule RailFenceCipher do
     |> Enum.map(&(acc[&1] |> Enum.reverse |> Enum.join))
   end
 
-  defp encode_rails([{rail,char}|more], acc) do
-    encode_rails(more, Map.put(acc, rail, [char|Map.get(acc, rail, [])]))
-  end
 
   @doc """
   Decode a given rail fence ciphertext to the corresponding plaintext
