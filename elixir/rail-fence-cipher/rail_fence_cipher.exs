@@ -5,24 +5,33 @@ defmodule RailFenceCipher do
   @spec encode(String.t, pos_integer) :: String.t
   def encode(str, 1    ), do: str
   def encode(str, rails) do
-    if String.length(str) <= rails, do: str,
-    else: do_encode(String.graphemes(str), rails - 1, 0, %{})
+    if String.length(str) <= rails do
+      str
+    else
+      count_up = 1..rails
+      cycle = if rails > 2 do
+                Enum.concat(count_up, (rails - 1)..2)
+              else
+                count_up
+              end
+      cycle
+      |> Stream.cycle
+      |> Enum.zip(String.graphemes(str))
+      |> encode_rails(%{})
+      |> Enum.join
+    end
   end
 
-  defp do_encode([], max_rail, _, acc) do
-    (0..(max_rail))
-    |> Enum.map(&(acc[&1] |> Enum.join |> String.reverse))
-    |> Enum.join
+  defp encode_rails([], acc) do
+    acc
+    |> Map.keys
+    |> Enum.sort
+    |> Enum.map(&(acc[&1] |> Enum.reverse |> Enum.join))
   end
 
-  defp do_encode([char|more], max_rail, char_num, acc) do
-    cur_rail_num = rail_num(char_num, max_rail)
-    new_acc = if acc[cur_rail_num], do: acc,
-              else: Map.put(acc, cur_rail_num, [])
-    do_encode(more, max_rail, char_num + 1,
-              %{ new_acc | cur_rail_num => [char|new_acc[cur_rail_num]] })
+  defp encode_rails([{rail,char}|more], acc) do
+    encode_rails(more, Map.put(acc, rail, [char|Map.get(acc, rail, [])]))
   end
-
 
   @doc """
   Decode a given rail fence ciphertext to the corresponding plaintext
