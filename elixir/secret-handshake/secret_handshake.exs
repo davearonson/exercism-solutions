@@ -1,3 +1,4 @@
+use Bitwise
 defmodule SecretHandshake do
   @doc """
   Determine the actions of a secret handshake based on the binary
@@ -18,24 +19,31 @@ defmodule SecretHandshake do
     code
     |> Integer.to_string(2)
     |> String.graphemes
-    |> Enum.reverse  # do this NOW so 16 takes effect AFTER stuff is in it
+    |> Enum.reverse
     |> Enum.with_index
-    |> process_slot([])
+    |> Enum.map(&{elem(&1,0), 1 <<< elem(&1,1)})
+    |> do_commands([])
   end
 
-  # Could either reverse it now OR build it w/ ++ which is much slower.
-  # Was trying to think of a way to do zero or one reversals,
-  # not two or three, but not coming up with anything I liked.
-  defp process_slot([], acc), do: acc |> Enum.reverse
-  defp process_slot([{"0", _idx}|tail], acc), do: process_slot(tail, acc)
-  defp process_slot([{"1",  idx}|tail], acc), do: do_command(idx, tail, acc)
+  @actions %{
+    0b1 => "wink",
+    0b10 => "double blink",
+    0b100 => "close your eyes",
+    0b1000 => "jump"
+  }
 
-  defp do_command(0, tail, acc), do: process_slot(tail, ["wink"|acc])
-  defp do_command(1, tail, acc), do: process_slot(tail, ["double blink"|acc])
-  defp do_command(2, tail, acc), do: process_slot(tail, ["close your eyes"|acc])
-  defp do_command(3, tail, acc), do: process_slot(tail, ["jump"|acc])
-  defp do_command(4, tail, acc), do: process_slot(tail, acc |> Enum.reverse)
-  defp do_command(_,    _, acc), do: acc
+  @action_nums @actions |> Map.keys
+
+  defp do_commands([], acc), do: acc |> Enum.reverse
+
+  defp do_commands([{"1",num}|tail], acc) when num in @action_nums do
+    do_commands(tail, [@actions[num]|acc])
+  end
+
+  # note: depends on assumption that 16 is LAST!
+  defp do_commands([{"1",16}|tail], acc), do: acc
+
+  defp do_commands([_|tail], acc), do: do_commands(tail, acc)
 
 end
 
