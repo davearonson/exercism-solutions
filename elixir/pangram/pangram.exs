@@ -19,7 +19,7 @@ defmodule Pangram do
     sentence
     |> String.downcase
     |> String.to_charlist
-    |> Enum.filter(&Enum.member?(@alphabet, &1))
+    |> Enum.filter(&(&1 >= ?a && &1 <= ?z))
     |> Enum.uniq
     |> Enum.count
     == (@alphabet |> Enum.count)
