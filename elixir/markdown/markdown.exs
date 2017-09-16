@@ -16,40 +16,48 @@ defmodule Markdown do
     |> String.split("\n")
     |> Enum.map(&process/1)
     |> Enum.join
-    |> patch
+    |> wrap_list_entries
   end
 
   defp process(line) do
     case line |> String.first do
-      "#" -> line |> parse_header_md_level |> enclose_with_header_tag
-      "*" -> line |> parse_list_md_level
-      _   -> line |> String.split |> enclose_with_paragraph_tag
+      "#" -> process_header(line)
+      "*" -> process_list_entry(line)
+      _   -> process_text_line(line)
     end
   end
 
-  defp parse_header_md_level(header_line) do
-    [h | t] = String.split(header_line)
-    {h |> String.length |> to_string, Enum.join(t, " ")}
+  defp parse_header_level(line) do
+    [h | t] = String.split(line)
+    {h |> String.length, Enum.join(t, " ")}
   end
 
-  defp parse_list_md_level(list_line) do
-    t = list_line |> String.trim_leading("* ") |> String.split
-    "<li>#{join_words_with_tags(t)}</li>"
+  defp process_list_entry(line) do
+    content = line
+              |> String.trim_leading("* ")
+              |> String.split
+              |> process_markdown_in_line
+    "<li>#{content}</li>"
   end
 
-  defp enclose_with_header_tag({header_level, contents}) do
-    "<h#{header_level}>#{contents}</h#{header_level}>"
+  defp process_header(line) do
+    {header_level, contents} = parse_header_level(line)
+    tag_type = "h#{header_level |> to_string}"
+    "<#{tag_type}>#{contents}</#{tag_type}>"
   end
 
-  defp enclose_with_paragraph_tag(line) do
-    "<p>#{join_words_with_tags(line)}</p>"
+  defp process_text_line(line) do
+    content = line |> String.split |> process_markdown_in_line
+    "<p>#{content}</p>"
   end
 
-  defp join_words_with_tags(line) do
-    line |> Enum.map(&replace_md_with_tag/1) |> Enum.join(" ")
+  defp process_markdown_in_line(words) do
+    words
+    |> Enum.map(&replace_markdown_around_word/1)
+    |> Enum.join(" ")
   end
 
-  defp replace_md_with_tag(word) do
+  defp replace_markdown_around_word(word) do
     word |> replace_prefix_md |> replace_suffix_md
   end
 
@@ -73,7 +81,7 @@ defmodule Markdown do
     end
   end
 
-  defp patch(text) do
+  defp wrap_list_entries(text) do
     text
     |> String.replace("<li>", "<ul><li>", global: false)
     |> String.replace_suffix("</li>", "</li></ul>")
