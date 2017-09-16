@@ -22,22 +22,22 @@ defmodule PigLatin do
     |> Enum.join(" ")
   end
 
-  def do_translate(word=[vowel|rest], acc)
+  defp do_translate(word=[vowel|rest], acc)
       when vowel in ~w(a e i o u) do
     "#{word}#{acc|>Enum.reverse}ay"
   end
 
-  def do_translate(word=[special,consonant|rest], [])
+  defp do_translate(word=[special,consonant|rest], [])
       when special in ~w(x y)
            and not consonant in ~w(a e i o u) do
     "#{word}ay"
   end
 
-  def do_translate(["q", "u"|rest], acc) do
+  defp do_translate(["q", "u"|rest], acc) do
     do_translate(rest, ["u", "q" | acc])
   end
 
-  def do_translate([first|rest], acc) do
+  defp do_translate([first|rest], acc) do
     do_translate(rest, [first|acc])
   end
 end
