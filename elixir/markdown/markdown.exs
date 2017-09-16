@@ -14,12 +14,12 @@ defmodule Markdown do
   def parse(text) do
     text
     |> String.split("\n")
-    |> Enum.map(&process/1)
+    |> Enum.map(&process_line/1)
     |> Enum.join  # note we do NOT preserve linebreaks!
     |> wrap_list_entries
   end
 
-  defp process(line) do
+  defp process_line(line) do
     case String.first(line) do
       "#" -> process_header(line)
       "*" -> process_list_entry(line)
@@ -66,23 +66,15 @@ defmodule Markdown do
   end
 
   defp replace_prefix_md(word) do
-    cond do
-      word =~ ~r/^__/ ->
-        String.replace_prefix(word, "__", "<strong>")
-      word =~ ~r/^_/ ->
-        String.replace_prefix(word, "_", "<em>")
-      true -> word
-    end
+    word
+    |> String.replace_prefix("__", "<strong>")
+    |> String.replace_prefix("_", "<em>")
   end
 
   defp replace_suffix_md(word) do
-    cond do
-      word =~ ~r/__$/ ->
-        String.replace_suffix(word, "__", "</strong>")
-      word =~ ~r/[_$]/ ->
-        String.replace_suffix(word, "_", "</em>")
-      true -> word
-    end
+    word
+    |> String.replace_suffix("__", "</strong>")
+    |> String.replace_suffix("_", "</em>")
   end
 
   defp wrap_list_entries(text) do
