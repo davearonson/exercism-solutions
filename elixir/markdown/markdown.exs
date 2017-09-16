@@ -20,7 +20,7 @@ defmodule Markdown do
   end
 
   defp process(line) do
-    case line |> String.first do
+    case String.first(line) do
       "#" -> process_header(line)
       "*" -> process_list_entry(line)
       _   -> process_text_line(line)
@@ -60,15 +60,17 @@ defmodule Markdown do
   end
 
   defp replace_markdown_around_word(word) do
-    word |> replace_prefix_md |> replace_suffix_md
+    word
+    |> replace_prefix_md
+    |> replace_suffix_md
   end
 
   defp replace_prefix_md(word) do
     cond do
       word =~ ~r/^__/ ->
-        word |> String.replace_prefix("__", "<strong>")
+        String.replace_prefix(word, "__", "<strong>")
       word =~ ~r/^_/ ->
-        word |> String.replace_prefix("_", "<em>")
+        String.replace_prefix(word, "_", "<em>")
       true -> word
     end
   end
@@ -76,9 +78,9 @@ defmodule Markdown do
   defp replace_suffix_md(word) do
     cond do
       word =~ ~r/__$/ ->
-        word |> String.replace_suffix("__", "</strong>")
+        String.replace_suffix(word, "__", "</strong>")
       word =~ ~r/[_$]/ ->
-        word |> String.replace_suffix("_", "</em>")
+        String.replace_suffix(word, "_", "</em>")
       true -> word
     end
   end
