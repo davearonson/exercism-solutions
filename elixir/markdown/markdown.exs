@@ -27,6 +27,12 @@ defmodule Markdown do
     end
   end
 
+  defp process_header(line) do
+    {header_level, contents} = parse_header_level(line)
+    tag_type = "h#{header_level |> to_string}"
+    wrap(contents, tag_type)
+  end
+
   defp parse_header_level(line) do
     [h | t] = String.split(line)
     {h |> String.length, Enum.join(t, " ")}
@@ -40,19 +46,13 @@ defmodule Markdown do
     wrap(content, "li")
   end
 
-  defp wrap(content, tag_type) do
-    "<#{tag_type}>#{content}</#{tag_type}>"
-  end
-
-  defp process_header(line) do
-    {header_level, contents} = parse_header_level(line)
-    tag_type = "h#{header_level |> to_string}"
-    wrap(contents, tag_type)
-  end
-
   defp process_text_line(line) do
     content = line |> String.split |> process_markdown_in_line
     wrap(content, "p")
+  end
+
+  defp wrap(content, tag_type) do
+    "<#{tag_type}>#{content}</#{tag_type}>"
   end
 
   defp process_markdown_in_line(words) do
@@ -90,4 +90,5 @@ defmodule Markdown do
     |> String.replace("<li>", "<ul><li>", global: false)
     |> String.replace_suffix("</li>", "</li></ul>")
   end
+
 end
