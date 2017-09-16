@@ -28,14 +28,9 @@ defmodule Markdown do
   end
 
   defp process_header(line) do
-    {header_level, contents} = parse_header_level(line)
-    tag_type = "h#{header_level |> to_string}"
-    wrap(contents, tag_type)
-  end
-
-  defp parse_header_level(line) do
-    [h | t] = String.split(line)
-    {h |> String.length, Enum.join(t, " ")}
+    [hashes | _rest] = String.split(line)
+    contents = line |> String.replace(~r/^#{hashes}\s*/, "")
+    wrap(contents, "h#{String.length(hashes)}")
   end
 
   defp process_list_entry(line) do
