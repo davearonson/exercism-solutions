@@ -37,18 +37,22 @@ defmodule Markdown do
               |> String.trim_leading("* ")
               |> String.split
               |> process_markdown_in_line
-    "<li>#{content}</li>"
+    wrap(content, "li")
+  end
+
+  defp wrap(content, tag_type) do
+    "<#{tag_type}>#{content}</#{tag_type}>"
   end
 
   defp process_header(line) do
     {header_level, contents} = parse_header_level(line)
     tag_type = "h#{header_level |> to_string}"
-    "<#{tag_type}>#{contents}</#{tag_type}>"
+    wrap(contents, tag_type)
   end
 
   defp process_text_line(line) do
     content = line |> String.split |> process_markdown_in_line
-    "<p>#{content}</p>"
+    wrap(content, "p")
   end
 
   defp process_markdown_in_line(words) do
