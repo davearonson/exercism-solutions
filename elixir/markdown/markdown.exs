@@ -15,7 +15,7 @@ defmodule Markdown do
     text
     |> String.split("\n")
     |> Enum.map(&process/1)
-    |> Enum.join
+    |> Enum.join  # note we do NOT preserve linebreaks!
     |> wrap_list_entries
   end
 
