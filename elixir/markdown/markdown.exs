@@ -29,21 +29,24 @@ defmodule Markdown do
 
   defp process_header(line) do
     [hashes | _rest] = String.split(line)
-    contents = line |> String.replace(~r/^#{hashes}\s*/, "")
-    wrap(contents, "h#{String.length(hashes)}")
+    line
+    |> String.replace(~r/^#{hashes}\s*/, "")
+    |> wrap("h#{String.length(hashes)}")
   end
 
   defp process_list_entry(line) do
-    content = line
-              |> String.trim_leading("* ")
-              |> String.split
-              |> process_markdown_in_line
-    wrap(content, "li")
+    line
+    |> String.trim_leading("* ")
+    |> String.split
+    |> process_markdown_in_line
+    |> wrap("li")
   end
 
   defp process_text_line(line) do
-    content = line |> String.split |> process_markdown_in_line
-    wrap(content, "p")
+    line
+    |> String.split
+    |> process_markdown_in_line
+    |> wrap("p")
   end
 
   defp wrap(content, tag_type) do
