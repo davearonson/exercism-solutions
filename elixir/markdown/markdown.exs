@@ -12,7 +12,11 @@ defmodule Markdown do
   """
   @spec parse(String.t) :: String.t
   def parse(text) do
-    text |> String.split("\n") |> Enum.map(&process/1) |> Enum.join |> patch
+    text
+    |> String.split("\n")
+    |> Enum.map(&process/1)
+    |> Enum.join
+    |> patch
   end
 
   defp process(line) do
@@ -61,8 +65,10 @@ defmodule Markdown do
 
   defp replace_suffix_md(word) do
     cond do
-      word =~ ~r/#{"__"}{1}$/ -> String.replace(word, ~r/#{"__"}{1}$/, "</strong>")
-      word =~ ~r/[^#{"_"}{1}]/ -> String.replace(word, ~r/_/, "</em>")
+      word =~ ~r/#{"__"}{1}$/ ->
+        String.replace(word, ~r/#{"__"}{1}$/, "</strong>")
+      word =~ ~r/[^#{"_"}{1}]/ ->
+        String.replace(word, ~r/_/, "</em>")
       true -> word
     end
   end
