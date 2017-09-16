@@ -12,24 +12,24 @@ defmodule Markdown do
   """
   @spec parse(String.t) :: String.t
   def parse(m) do
-    patch(Enum.join(Enum.map(String.split(m, "\n"), fn(t) -> process(t) end)))
+    m |> String.split("\n") |> Enum.map(&process/1) |> Enum.join |> patch
   end
 
   defp process(t) do
     case t |> String.first do
-      "#" -> enclose_with_header_tag(parse_header_md_level(t))
-      "*" -> parse_list_md_level(t)
-      _   -> enclose_with_paragraph_tag(String.split(t))
+      "#" -> t |> parse_header_md_level |> enclose_with_header_tag
+      "*" -> t |> parse_list_md_level
+      _   -> t |> String.split |> enclose_with_paragraph_tag
     end
   end
 
   defp parse_header_md_level(hwt) do
     [h | t] = String.split(hwt)
-    {to_string(String.length(h)), Enum.join(t, " ")}
+    {h |> String.length |> to_string, Enum.join(t, " ")}
   end
 
   defp parse_list_md_level(l) do
-    t = String.split(String.trim_leading(l, "* "))
+    t = l |> String.trim_leading("* ") |> String.split
     "<li>#{join_words_with_tags(t)}</li>"
   end
 
@@ -42,11 +42,11 @@ defmodule Markdown do
   end
 
   defp join_words_with_tags(t) do
-    Enum.join(Enum.map(t, fn(w) -> replace_md_with_tag(w) end), " ")
+    t |> Enum.map(&replace_md_with_tag/1) |> Enum.join(" ")
   end
 
   defp replace_md_with_tag(w) do
-    replace_suffix_md(replace_prefix_md(w))
+    w |> replace_prefix_md |> replace_suffix_md
   end
 
   defp replace_prefix_md(w) do
@@ -68,7 +68,8 @@ defmodule Markdown do
   end
 
   defp patch(l) do
-    String.replace_suffix(String.replace(l, "<li>", "<ul><li>", global: false),
-                          "</li>", "</li></ul>")
+    l
+    |> String.replace("<li>", "<ul><li>", global: false)
+    |> String.replace_suffix("</li>", "</li></ul>")
   end
 end
