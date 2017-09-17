@@ -45,7 +45,7 @@ defmodule Zipper do
   Get the value of the focus node.
   """
   @spec value(Z.t) :: any
-  def value(%Zipper{path: [head|_rest]}) do
+  def value(%Zipper{path: [head|_tail]}) do
     head.value
   end
 
@@ -53,16 +53,16 @@ defmodule Zipper do
   Get the left child of the focus node, if any.
   """
   @spec left(Z.t) :: Z.t | nil
-  def left(%Zipper{path: [%BT{left: nil}|_rest]}), do: nil
-  def left(z=%Zipper{path: [%BT{left: lefty}|_rest]}) do
+  def left(  %Zipper{path: [%BT{left: nil  }|_tail]}), do: nil
+  def left(z=%Zipper{path: [%BT{left: lefty}|_tail]})  do
     %Zipper{ z | path: [lefty|z.path], dirs: [:left|z.dirs] }
   end
 
   @doc """
   Get the right child of the focus node, if any.
   """
-  def right(%Zipper{path: [%BT{right: nil}|_rest]}), do: nil
-  def right(z=%Zipper{path: [%BT{right: righty}|_rest]}) do
+  def right(  %Zipper{path: [%BT{right: nil   }|_tail]}), do: nil
+  def right(z=%Zipper{path: [%BT{right: righty}|_tail]})  do
     %Zipper{ z | path: [righty|z.path], dirs: [:right|z.dirs] }
   end
 
@@ -79,41 +79,39 @@ defmodule Zipper do
   Set the value of the focus node.
   """
   @spec set_value(Z.t, any) :: Z.t
-  def set_value(z=%Zipper{path: [head|rest]}, v) do
-    new_head = %BT{ head | value: v }
-    new_data = update_tree(rest, z.dirs, new_head)
-    %Zipper{ z | data: new_data,
-                 path: [new_head | rest] }
+  def set_value(z=%Zipper{path: [head|_tail]}, v) do
+    replace_focus(z, %BT{ head | value: v })
   end
 
   @doc """
   Replace the left child tree of the focus node.
   """
   @spec set_left(Z.t, BT.t) :: Z.t
-  def set_left(z=%Zipper{path: [head|rest]}, l) do
-    new_head = %BT{ head | left: l }
-    new_data = update_tree(rest, z.dirs, new_head)
-    %Zipper{ z | data: new_data, path: [new_head | rest] }
+  def set_left(z=%Zipper{path: [head|_tail]}, l) do
+    replace_focus(z, %BT{ head | left: l })
   end
 
   @doc """
   Replace the right child tree of the focus node.
   """
   @spec set_right(Z.t, BT.t) :: Z.t
-  def set_right(z=%Zipper{path: [head|rest]}, l) do
-    new_head = %BT{ head | right: l }
-    new_data = update_tree(rest, z.dirs, new_head)
-    %Zipper{ z | data: new_data, path: [new_head | rest] }
+  def set_right(z=%Zipper{path: [head|_tail]}, r) do
+    replace_focus(z, %BT{ head | right: r })
   end
 
 
-  defp update_tree([], [], sub), do: sub
-  defp update_tree([head|rest], [last_dir|prev_dirs], sub) do
-    new_sub = case last_dir do
-                :left -> %BT{ head | left: sub }
-                :right -> %BT{ head | right: sub }
+  defp replace_focus(z=%Zipper{path: [_head|tail]}, new_head) do
+    %Zipper{ z | data: update_tree(tail, z.dirs, new_head),
+                 path: [new_head | tail] }
+  end
+
+  defp update_tree([path_head|path_tail], [dirs_head|dirs_tail], sub) do
+    new_sub = case dirs_head do
+                :left  -> %BT{ path_head | left:  sub }
+                :right -> %BT{ path_head | right: sub }
               end
-    update_tree(rest, prev_dirs, new_sub)
+    update_tree(path_tail, dirs_tail, new_sub)
   end
+  defp update_tree([], [], sub), do: sub
 
 end
