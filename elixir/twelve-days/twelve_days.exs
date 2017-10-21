@@ -1,43 +1,12 @@
 defmodule TwelveDays do
 
-  @gifts {
-    " a Partridge in a Pear Tree",
-    " two Turtle Doves, and",
-    " three French Hens,",
-    " four Calling Birds,",
-    " five Gold Rings,",
-    " six Geese-a-Laying,",
-    " seven Swans-a-Swimming,",
-    " eight Maids-a-Milking,",
-    " nine Ladies Dancing,",
-    " ten Lords-a-Leaping,",
-    " eleven Pipers Piping,",
-    " twelve Drummers Drumming,"
-  }
-
-  @numbers {
-    "first",
-    "second",
-    "third",
-    "fourth",
-    "fifth",
-    "sixth",
-    "seventh",
-    "eighth",
-    "ninth",
-    "tenth",
-    "eleventh",
-    "twelfth"
-  }
-
   @doc """
   Given a `number`, return the song's verse for that specific day, including
   all gifts for previous days in the same line.
   """
   @spec verse(number :: integer) :: String.t()
   def verse(number) do
-    index = number - 1
-    "On the #{elem(@numbers, index)} day of Christmas my true love gave to me,#{gift_list(index)}."
+    "On the #{ordinal(number)} day of Christmas my true love gave to me, #{gift_list(number)}."
   end
 
   @doc """
@@ -59,10 +28,52 @@ defmodule TwelveDays do
     verses(1,12)
   end
 
-  defp gift_list(-1), do: ""
-  defp gift_list(number) do
-    "#{elem(@gifts, number)}#{gift_list(number-1)}"
+  ### PRIVATE STUFF
+
+  @gifts {
+    "nothing, just here to make the indexing start at 1, not 0",
+    "a Partridge in a Pear Tree",
+    "two Turtle Doves",
+    "three French Hens",
+    "four Calling Birds",
+    "five Gold Rings",
+    "six Geese-a-Laying",
+    "seven Swans-a-Swimming",
+    "eight Maids-a-Milking",
+    "nine Ladies Dancing",
+    "ten Lords-a-Leaping",
+    "eleven Pipers Piping",
+    "twelve Drummers Drumming"
+  }
+
+  @ordinals {
+    "nothing, just here to make the indexing start at 1, not 0",
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eighth",
+    "ninth",
+    "tenth",
+    "eleventh",
+    "twelfth"
+  }
+
+  defp ordinal(number) do
+    elem(@ordinals, number)
   end
+
+  defp gift_list(1), do: gift(1)
+  defp gift_list(number) do
+    # Elixir does not have an Enum.join/3 taking something to put
+    # only before the last one :-(
+    "#{number..2 |> Enum.map(&gift/1) |> Enum.join(", ")}, and #{gift(1)}"
+  end
+
+  defp gift(number), do: elem(@gifts, number)
 
 end
 
