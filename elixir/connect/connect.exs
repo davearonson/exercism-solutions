@@ -60,16 +60,17 @@ defmodule Connect do
   # if not yet success or failure, try to progress via each surrounding spot.
   # board is tilted, so if we go up we can't go further left,
   # and if we go down, we can't go further right.
-  @neighbor_deltas [{1,0},{1,-1},{0,-1},{0,1},{-1,0},{-1,1}]
   defp connect_to_bottom(board, who, row, col) do
     # "S" could be anything other than empty or a player;
     # making it one char helps debugging via IO.puts :-)
     new_row = elem(board, row) |> put_elem(col, "S")
     new_board = board |> put_elem(row, new_row)
-    @neighbor_deltas
-    |> Enum.any?(&(connect_to_bottom(new_board, who,
-                                     row + elem(&1, 0),
-                                     col + elem(&1, 1))))
+    connect_to_bottom(new_board, who, row + 1, col    ) ||
+    connect_to_bottom(new_board, who, row + 1, col - 1) ||
+    connect_to_bottom(new_board, who, row    , col - 1) ||
+    connect_to_bottom(new_board, who, row    , col + 1) ||
+    connect_to_bottom(new_board, who, row - 1, col    ) ||
+    connect_to_bottom(new_board, who, row - 1, col + 1)
   end
 
 
