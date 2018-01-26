@@ -1,4 +1,4 @@
-"""
+_comment = """
   IDEA from Glenn Espinosa:
   - Start from desired edge, with desired color
     (eg, from top w/ O, or from left w/ X).
@@ -8,15 +8,6 @@
   - If we hit opposite side, that color has won
   - If we can't go anywhere, end this exploration;
     automagically goes back to last fork-point
-
-    Now, where is it we CAN go from x,y?
-    Obviously left and right (x +/- 1, y).
-    Directly up (x,y-1), and up-right (x+1, y-1),
-    directly down (x,y+1), and down-LEFT (x-1, y+1).
-    (Using y-coord as typical of computer graphics,
-    where 0 is top, not math, where it's bottom.)
-
-    Much more efficient if we first make it all a tuple of tuples.  :-)
 """
 defmodule Connect do
   @doc """
@@ -26,34 +17,67 @@ defmodule Connect do
   """
   @spec result_for([String.t]) :: :none | :black | :white
   def result_for(board) do
+    grid = board |> Enum.map(&String.graphemes/1)
     cond do
-      can_connect(tuplize(board), "X") -> :black
-      can_connect(tuplize(transpose(board)), "O") -> :white
+      # use tupleized version for easy cell access/substitution
+      connect_to_bottom(tupleize(grid), "O") -> :white
+      # transposing saves us the complex logic of
+      # figuring out what direction we're going,
+      # while figuring out if someone won
+      connect_to_bottom(tupleize(transpose(grid)), "X") -> :black
       true -> :none
     end
   end
 
 
-  def tuplize(board), do: tuplize(board, {})
-  def tuplize([], acc), do: acc
-  def tuplize([head|tail], acc) do
-    tuplize(tail, Tuple.append(acc, List.to_tuple(head)))
+  defp tupleize(board), do: tupleize(board, {})
+  defp tupleize([], acc), do: acc
+  defp tupleize([head|tail], acc) do
+    tupleize(tail, Tuple.append(acc, head |> List.to_tuple))
   end
 
-  defp can_connect(board, who) do
-    # TODO:
-    # starting from each point held by this player,
-    # on the top row of the board,
-    # try to trace a path to the bottom row,
-    # through each legit move to a spot held by the same player,
-    # that we have not yet seen.
+
+  defp connect_to_bottom(board, who) do
+    (0..tuple_size(elem(board, 0)) - 1)
+    |> Enum.any?(&(connect_to_bottom(board, who, 0, &1)))
   end
 
-  def transpose([head|tail]) do
+  # did we try to go off the board?  no win here.
+  defp connect_to_bottom(board, _who, row, col)
+       when row < 0 or col < 0 or col >= tuple_size(elem(board, 0)),
+       do: false
+
+  # is this spot not this player's, or already seen?  no win here.
+  defp connect_to_bottom(board, who, row, col)
+       when elem(elem(board, row), col) != who,
+       do: false
+
+  # did we reach the bottom?  YAY!
+  defp connect_to_bottom(board, _who, row, _col)
+       when row == tuple_size(board) - 1,
+       do: true
+
+  # if not yet success or failure, try to progress via each surrounding spot.
+  # board is tilted, so if we go up we can't go further left,
+  # and if we go down, we can't go further right.
+  @neighbor_deltas [{1,0},{1,-1},{0,-1},{0,1},{-1,0},{-1,1}]
+  defp connect_to_bottom(board, who, row, col) do
+    # "S" could be anything other than empty or a player;
+    # making it one char helps debugging via IO.puts :-)
+    new_row = elem(board, row) |> put_elem(col, "S")
+    new_board = board |> put_elem(row, new_row)
+    @neighbor_deltas
+    |> Enum.any?(&(connect_to_bottom(new_board, who,
+                                     row + elem(&1, 0),
+                                     col + elem(&1, 1))))
+  end
+
+
+  defp transpose([head|tail]) do
     transpose(tail, Enum.map(head, &([&1])))
   end
-  def transpose([], acc), do: Enum.map(acc, &Enum.reverse/1)
-  def transpose([head|tail], acc) do
+  defp transpose([], acc), do: Enum.map(acc, &Enum.reverse/1)
+  defp transpose([head|tail], acc) do
     transpose(tail,
               acc
               |> Enum.zip(head)
