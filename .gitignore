@@ -1,4 +1,5 @@
 *test*.*
+!daves_*test*.*
 hint_*.md
 .version
 README.md
