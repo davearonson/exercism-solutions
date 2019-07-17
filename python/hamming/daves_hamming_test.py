@@ -48,31 +48,31 @@ def test_two_empty_means_distance_zero():
 def test_raises_with_msg_if_first_shorter():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance("GC", "TGA")
-    assert hamming.LengthMismatchMessage in str(exception_info)
+    assert hamming.LENGTH_MISMATCH_MESSAGE in str(exception_info)
 
 def test_raises_with_msg_if_second_shorter():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance("GCA", "TG")
-    assert hamming.LengthMismatchMessage in str(exception_info)
+    assert hamming.LENGTH_MISMATCH_MESSAGE in str(exception_info)
 
 def test_raises_with_msg_if_first_has_invalid_base():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance("CAGE", "CAGT")
-    assert hamming.InvalidBaseMessage in str(exception_info)
+    assert hamming.INVALID_BASE_MESSAGE in str(exception_info)
 
 def test_raises_with_msg_if_second_has_invalid_base():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance("CAGT", "CAGE")
-    assert hamming.InvalidBaseMessage in str(exception_info)
+    assert hamming.INVALID_BASE_MESSAGE in str(exception_info)
 
 # heavy bulletproofing: invalid cases not likely from innocent error
 
 def test_raises_with_msg_if_first_not_string():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance(3, "TG")
-    assert hamming.NotStringMessage in str(exception_info)
+    assert hamming.NOT_STRING_MESSAGE in str(exception_info)
 
 def test_raises_with_msg_if_second_not_string():
     with pytest.raises(ValueError) as exception_info:
         hamming.distance("TG", 3)
-    assert hamming.NotStringMessage in str(exception_info)
+    assert hamming.NOT_STRING_MESSAGE in str(exception_info)
