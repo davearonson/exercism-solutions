@@ -5,7 +5,9 @@ import pytest
 
 from high_scores import HighScores
 
-class Test_scores_access:
+# pylint: disable=R0201  # need these to be methods for pytest
+
+class TestScoresAccess:
 
     def test_basic(self):
         array = [17, 42, 23, 0]
@@ -21,12 +23,12 @@ class Test_scores_access:
 
     def test_dont_modify_list(self):
         array = [17, 42, 86, 23, 0, 69]
-        hs = HighScores(array)
-        hs.scores  # don't need to use it
-        assert hs.scores == array
+        highs = HighScores(array)
+        _ = highs.scores  # don't need to use it
+        assert highs.scores == array
 
 
-class Test_latest_method:
+class TestLatestMethod:
 
     def test_basic(self):
         array = [17, 42, 23, 0]
@@ -37,15 +39,15 @@ class Test_latest_method:
         assert HighScores(array).latest() == 69
 
     def test_with_none(self):
-        assert HighScores([]).latest() == None
+        assert HighScores([]).latest() is None
 
     def test_dont_modify_list(self):
         array = [17, 42, 86, 23, 0, 69]
-        hs = HighScores(array)
-        hs.latest()  # don't need to use it 
-        assert hs.scores == array
+        highs = HighScores(array)
+        _ = highs.latest()  # don't need to use it
+        assert highs.scores == array
 
-class Test_personal_best_method:
+class TestPersonalBestMethod:
 
     def test_basic(self):
         array = [17, 42, 23, 0]
@@ -56,15 +58,15 @@ class Test_personal_best_method:
         assert HighScores(array).personal_best() == 69
 
     def test_with_none(self):
-        assert HighScores([]).personal_best() == None
+        assert HighScores([]).personal_best() is None
 
     def test_dont_modify_list(self):
         array = [17, 42, 86, 23, 0, 69]
-        hs = HighScores(array)
-        hs.personal_best()  # don't need to use it 
-        assert hs.scores == array
+        highs = HighScores(array)
+        _ = highs.personal_best()  # don't need to use it
+        assert highs.scores == array
 
-class Test_personal_top_three_method:
+class TestPersonalTopThreeMethod:
 
     def test_basic(self):
         array = [17, 42, 23, 0, 86, 69]
@@ -88,12 +90,12 @@ class Test_personal_top_three_method:
 
     def test_with_only_three(self):
         array = [42, 86, 69]
-        expected = sorted(array, reverse = True)
+        expected = sorted(array, reverse=True)
         assert HighScores(array).personal_top_three() == expected
 
     def test_with_only_two(self):
         array = [42, 69]
-        expected = sorted(array, reverse = True)
+        expected = sorted(array, reverse=True)
         assert HighScores(array).personal_top_three() == expected
 
     def test_with_only_one(self):
@@ -106,6 +108,6 @@ class Test_personal_top_three_method:
 
     def test_dont_modify_list(self):
         array = [17, 42, 86, 23, 0, 69]
-        hs = HighScores(array)
-        hs.personal_top_three()  # don't need to use it 
-        assert hs.scores == array
+        highs = HighScores(array)
+        highs.personal_top_three()  # don't need to use it
+        assert highs.scores == array

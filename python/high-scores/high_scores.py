@@ -12,4 +12,4 @@ class HighScores:
         return max(self.scores) if self.scores else None
 
     def personal_top_three(self):
-        return sorted(self.scores, reverse = True)[:3]
+        return sorted(self.scores, reverse=True)[:3]
