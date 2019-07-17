@@ -5,54 +5,54 @@ from matrix import Matrix
 
 # First some fairly normal tests:
 
-class Test_with_3x3_matrix:
+class TestWith3x3Matrix:
 
     matrix = Matrix("1 2 3\n4 5 6\n7 8 9")
 
     def test_extract_first_col(self):
-        assert self.matrix.column(1) == [1,4,7]
+        assert self.matrix.column(1) == [1, 4, 7]
 
     def test_extract_first_row(self):
-        assert self.matrix.row(1) == [1,2,3]
+        assert self.matrix.row(1) == [1, 2, 3]
 
     def test_extract_middle_col(self):
-        assert self.matrix.column(2) == [2,5,8]
+        assert self.matrix.column(2) == [2, 5, 8]
 
     def test_extract_middle_row(self):
-        assert self.matrix.row(2) == [4,5,6]
+        assert self.matrix.row(2) == [4, 5, 6]
 
     def test_extract_last_col(self):
-        assert self.matrix.column(3) == [3,6,9]
+        assert self.matrix.column(3) == [3, 6, 9]
 
     def test_extract_last_row(self):
-        assert self.matrix.row(3) == [7,8,9]
+        assert self.matrix.row(3) == [7, 8, 9]
 
 
 # make sure it works with non-rectangular matrix
 
-class Test_with_2x3_matrix:
+class TestWith2x3Matrix:
 
     matrix = Matrix("1 2\n3 4\n5 6")
 
     def test_extract_first_row(self):
-        assert self.matrix.row(1) == [1,2]
+        assert self.matrix.row(1) == [1, 2]
 
     def test_extract_middle_row(self):
-        assert self.matrix.row(2) == [3,4]
+        assert self.matrix.row(2) == [3, 4]
 
     def test_extract_last_row(self):
-        assert self.matrix.row(3) == [5,6]
+        assert self.matrix.row(3) == [5, 6]
 
     def test_extract_first_col(self):
-        assert self.matrix.column(1) == [1,3,5]
+        assert self.matrix.column(1) == [1, 3, 5]
 
     def test_extract_last_col(self):
-        assert self.matrix.column(2) == [2,4,6]
+        assert self.matrix.column(2) == [2, 4, 6]
 
 
 # make sure it works with matrix as skinny as possible
 
-class Test_with_1x3_matrix:
+class TestWith1x3Matrix:
 
     matrix = Matrix("1\n2\n3")
 
@@ -66,17 +66,17 @@ class Test_with_1x3_matrix:
         assert self.matrix.row(3) == [3]
 
     def test_extract_col(self):
-        assert self.matrix.column(1) == [1,2,3]
+        assert self.matrix.column(1) == [1, 2, 3]
 
 
 # make sure it works with matrix as short as possible
 
-class Test_with_3x1_matrix:
+class TestWith3x1Matrix:
 
     matrix = Matrix("1 2 3")
 
     def test_extract_row(self):
-        assert self.matrix.row(1) == [1,2,3]
+        assert self.matrix.row(1) == [1, 2, 3]
 
     def test_extract_first_col(self):
         assert self.matrix.column(1) == [1]
@@ -90,7 +90,7 @@ class Test_with_3x1_matrix:
 
 # make sure it works with matrix as small as possible
 
-class Test_with_1x1_matrix:
+class TestWith1x1Matrix:
 
     matrix = Matrix("1")
 
@@ -103,7 +103,7 @@ class Test_with_1x1_matrix:
 
 # make sure it works with mixed width numbers
 
-class Test_with_mixed_width_3x3_matrix:
+class TestWithMixedWidth3x3Matrix:
 
     matrix = Matrix("1 23 456\n789 10 2\n34 5678 90120")
 
@@ -131,32 +131,32 @@ class Test_with_mixed_width_3x3_matrix:
 # we're doing security-related software so we should have more than usual.
 
 
-class Test_with_invalid_index:
+class TestWithInvalidIndex:
 
     matrix = Matrix("1 2\n3 4")
 
     def test_extract_row_too_high(self):
-        assert self.matrix.row(3) == None
+        assert self.matrix.row(3) is None
 
     def test_extract_row_too_low(self):
-        assert self.matrix.row(0) == None
+        assert self.matrix.row(0) is None
 
     def test_extract_col_too_high(self):
-        assert self.matrix.column(3) == None
+        assert self.matrix.column(3) is None
 
     def test_extract_col_too_low(self):
-        assert self.matrix.column(0) == None
+        assert self.matrix.column(0) is None
 
 
-class Test_with_empty_matrix:
+class TestWithEmptyMatrix:
 
     matrix = Matrix("")
 
     def test_extract_row(self):
-        assert self.matrix.row(1) == None
+        assert self.matrix.row(1) is None
 
     def test_extract_col(self):
-        assert self.matrix.column(1) == None
+        assert self.matrix.column(1) is None
 
     # Having these return [] would be OK too, so long as they're
     # consistent between them.
@@ -168,4 +168,3 @@ class Test_with_empty_matrix:
 # - scientific notation
 # - non-numbers, tho it should be easy to adapt this to any unbroken string
 # - matrices of multiple blank rows (e.g, "\n\n\n" -> [[],[],[],[]]
-
