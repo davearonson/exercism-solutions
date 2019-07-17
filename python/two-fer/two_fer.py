@@ -1,9 +1,9 @@
-default_name = "you"
+DEFAULT_NAME = "you"
 
-def two_fer(name=default_name):
+def two_fer(name=DEFAULT_NAME):
     if isinstance(name, str):
         name = name.strip()
-        if name == "": name = default_name
+        if name == "": name = DEFAULT_NAME
     else:
         # If it's not even a string, just go with the default
         # name.  We COULD skip the "else" and just go with
@@ -14,5 +14,5 @@ def two_fer(name=default_name):
         # do security software, so all my entries in this series
         # will probably have much more bulletproofing than an
         # academic exercise would justify.
-        name = default_name
+        name = DEFAULT_NAME
     return f"One for {name}, one for me."
