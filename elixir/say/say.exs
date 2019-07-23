@@ -55,10 +55,12 @@ defmodule Say do
   def in_english(0), do: {:ok, "zero"}
 
   def in_english(number) do
-    {:ok, digit_groups_in_increasing_order(number)
-          |> Enum.map(&englishize_group/1)
-          |> label_groups(0, [])
-          |> Enum.join(" ")}
+    result =
+      digit_groups_in_increasing_order(number)
+      |> Enum.map(&englishize_group/1)
+      |> label_groups(0, [])
+      |> Enum.join(" ")
+    {:ok, result}
   end
 
 
