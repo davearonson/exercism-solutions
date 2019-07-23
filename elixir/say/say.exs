@@ -3,8 +3,6 @@ defmodule Say do
   Translate a positive integer into English.
   """
 
-  @group_names {"thousand", "million", "billion"}
-
   @ones_names %{
     "0" => "",
     "1" => "one",
@@ -58,9 +56,20 @@ defmodule Say do
     result =
       digit_groups_in_increasing_order(number)
       |> Enum.map(&englishize_group/1)
-      |> label_groups(0, [])
-      |> Enum.join(" ")
+      |> label_groups
+      |> Enum.reverse
+      |> join_non_nils(" ")
     {:ok, result}
+  end
+
+
+  defp digit_groups_in_increasing_order(number) do
+    number
+    |> Integer.to_string
+    |> String.graphemes
+    |> Enum.reverse
+    |> Enum.chunk_every(3)
+    |> Enum.map(&Enum.reverse/1)
   end
 
 
@@ -89,29 +98,15 @@ defmodule Say do
   end
 
 
-  defp label_groups([], _, acc), do: acc
-
-  defp label_groups([nil | more_groups], group_num, acc) do
-    label_groups(more_groups, group_num + 1, acc)
-  end
-
-  defp label_groups([group | more_groups], 0, acc) do
-    label_groups(more_groups, 1, [group | acc])
-  end
-
-  defp label_groups([group | more_groups], group_num, acc) do
-    result = "#{group} #{elem(@group_names, group_num - 1)}"
-    label_groups(more_groups, group_num + 1, [result | acc])
+  def label_groups(groups) do
+    groups
+    |> Enum.zip([nil, "thousand", "million", "billion"])
+    |> Enum.map(&label_one_group/1)
   end
 
 
-  defp digit_groups_in_increasing_order(number) do
-    number
-    |> Integer.to_string
-    |> String.graphemes
-    |> Enum.reverse
-    |> Enum.chunk_every(3)
-    |> Enum.map(&Enum.reverse/1)
-  end
+  defp label_one_group({nil  , _   }), do: nil
+  defp label_one_group({group, nil }), do: group
+  defp label_one_group({group, name}), do: "#{group} #{name}"
 
 end
