@@ -4,7 +4,7 @@ defmodule Say do
   """
 
   @ones_names %{
-    "0" => "",
+    "0" => nil,
     "1" => "one",
     "2" => "two",
     "3" => "three",
@@ -45,7 +45,7 @@ defmodule Say do
   @spec in_english(integer) :: {atom, String.t()}
 
   def in_english(number) when number < 0, do:
-    {:error, "number is out of range" }
+    {:error, "number is out of range"}
 
   def in_english(number) when number >= 1_000_000_000_000, do:
     {:error, "number is out of range"}
@@ -87,8 +87,6 @@ defmodule Say do
   defp englishize_group([tens, ones]) do
     [@tens_names[tens], englishize_group([ones])] |> join_non_nils("-")
   end
-
-  defp englishize_group(["0"]), do: nil
 
   defp englishize_group([digit]), do: @ones_names[digit]
 
