@@ -4,41 +4,38 @@ defmodule Say do
   """
 
   @ones_names %{
-    "0" => nil,
-    "1" => "one",
-    "2" => "two",
-    "3" => "three",
-    "4" => "four",
-    "5" => "five",
-    "6" => "six",
-    "7" => "seven",
-    "8" => "eight",
-    "9" => "nine"
-  }
-
-  @teens_names %{
-    "0" => "ten",
-    "1" => "eleven",
-    "2" => "twelve",
-    "3" => "thirteen",
-    "4" => "fourteen",
-    "5" => "fifteen",
-    "6" => "sixteen",
-    "7" => "seventeen",
-    "8" => "eighteen",
-    "9" => "nineteen"
+     # don't need zero
+     1 => "one",
+     2 => "two",
+     3 => "three",
+     4 => "four",
+     5 => "five",
+     6 => "six",
+     7 => "seven",
+     8 => "eight",
+     9 => "nine",
+    10 => "ten",
+    11 => "eleven",
+    12 => "twelve",
+    13 => "thirteen",
+    14 => "fourteen",
+    15 => "fifteen",
+    16 => "sixteen",
+    17 => "seventeen",
+    18 => "eighteen",
+    19 => "nineteen"
   }
 
   @tens_names %{
-    # 0 and 1 are taken care of by special cases
-    "2" => "twenty",
-    "3" => "thirty",
-    "4" => "forty",
-    "5" => "fifty",
-    "6" => "sixty",
-    "7" => "seventy",
-    "8" => "eighty",
-    "9" => "ninety"
+    # don't need 0 or 1, the way this is used (only for 20-99)
+    2 => "twenty",
+    3 => "thirty",
+    4 => "forty",
+    5 => "fifty",
+    6 => "sixty",
+    7 => "seventy",
+    8 => "eighty",
+    9 => "ninety"
   }
 
 
@@ -63,32 +60,29 @@ defmodule Say do
   end
 
 
-  defp digit_groups_in_increasing_order(number) do
-    number
-    |> Integer.to_string
-    |> String.graphemes
-    |> Enum.reverse
-    |> Enum.chunk_every(3)
-    |> Enum.map(&Enum.reverse/1)
+  defp digit_groups_in_increasing_order(n, acc \\ [])
+  defp digit_groups_in_increasing_order(0, acc), do: Enum.reverse(acc)
+  defp digit_groups_in_increasing_order(number, acc) do
+    digit_groups_in_increasing_order(div(number, 1000),
+                                    [rem(number, 1000) | acc])
   end
 
 
-  defp englishize_group(["0", tens, ones]), do: englishize_group([tens, ones])
-
-  defp englishize_group([hundreds, tens, ones]) do
-    [@ones_names[hundreds], "hundred", englishize_group([tens, ones])]
-    |> join_non_nils(" ")
+  defp englishize_group(number) when number >= 100 do
+    hundreds = div(number, 100)
+    rest     = rem(number, 100)
+    parts = ["#{@ones_names[hundreds]} hundred", englishize_group(rest)]
+    join_non_nils(parts, " ")
   end
 
-  defp englishize_group(["0", ones]), do: englishize_group([ones])
-
-  defp englishize_group(["1", ones]), do: @teens_names[ones]
-
-  defp englishize_group([tens, ones]) do
-    [@tens_names[tens], englishize_group([ones])] |> join_non_nils("-")
+  defp englishize_group(number) when number >= 20 do
+    tens = div(number, 10)
+    rest = rem(number, 10)
+    parts = [@tens_names[tens], englishize_group(rest)]
+    join_non_nils(parts, "-")
   end
 
-  defp englishize_group([digit]), do: @ones_names[digit]
+  defp englishize_group(number), do: @ones_names[number]
 
 
   defp join_non_nils(pieces, sep) do
