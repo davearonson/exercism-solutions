@@ -1,4 +1,5 @@
 *test*.*
+*.pyc
 !daves_*test*.*
 hint_*.md
 .version
