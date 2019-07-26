@@ -71,7 +71,7 @@ defmodule Say do
   defp englishize_group(number) when number >= 100 do
     hundreds = div(number, 100)
     rest     = rem(number, 100)
-    parts = ["#{@ones_names[hundreds]} hundred", englishize_group(rest)]
+    parts    = [@ones_names[hundreds], "hundred", englishize_group(rest)]
     join_non_nils(parts, " ")
   end
 
