@@ -4,17 +4,11 @@ class Luhn:
 
     def valid(self):
         digits = self.card_num.replace(" ", "")
-        if len(digits) <= 1: return False
-        try: total = self.__class__.calc(digits)
-        except ValueError: return False
-        return total % 10 == 0
+        if len(digits) <= 1 or not digits.isdigit(): return False
+        return self.__class__._calc(digits) % 10 == 0
 
     @staticmethod
-    def calc(digits):
-        return Luhn._calc(digits, False, 0)
-
-    @staticmethod
-    def _calc(digits, even_spot, accumulator):
+    def _calc(digits, even_spot=False, accumulator=0):
         if not digits: return accumulator
         value = int(digits[-1])
         if even_spot:
