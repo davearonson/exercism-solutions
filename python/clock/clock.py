@@ -5,7 +5,7 @@ class Clock(object):
         self._minute = total % 60
 
     def __repr__(self):
-        return f"{'%02d' % self._hour}:{'%02d' % self._minute}"
+        return "%02d:%02d" % (self._hour, self._minute)
 
     def __eq__(self, other):
         return self._hour == other._hour and self._minute == other._minute
