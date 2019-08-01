@@ -1,9 +1,7 @@
-import math
-
 class Clock(object):
     def __init__(self, hour, minute):
         total = hour * 60 + minute
-        self._hour = math.floor(total / 60) % 24
+        self._hour = (total // 60) % 24
         self._minute = total % 60
 
     def __repr__(self):
