@@ -19,54 +19,56 @@ defmodule OcrNumbers do
 
   @spec convert([String.t()]) :: String.t()
   def convert(input) do
-    if rem(length(input), 4) == 0 do
-      result = input |> convert_four_rows([])
-      {success, details} = result
-      if success == :ok, do: {:ok, Enum.join(details, ",")},
-      else: result
+    with {:ok, _}         <- check_matrix_height(input),
+         rows             <- Enum.chunk_every(input, 4),
+         {:ok, converted} <- convert_rows(rows, [])
+    do
+      {:ok, Enum.join(converted, ",")}
     else
-      {:error, 'invalid line count'}
+      err -> err
     end
   end
 
-  defp convert_four_rows([], acc), do: {:ok, Enum.reverse(acc)}
-
-  defp convert_four_rows(rows, acc) do
-    result = convert_row(Enum.take(rows, 4))
-    {success, details} = result
-    if success == :ok do
-      rows |> Enum.drop(4) |> convert_four_rows([details|acc])
-    else
-      result
+  defp check_matrix_height(input) do
+    case rem(length(input), 4) do
+      0 -> {:ok, nil}
+      _ -> {:error, 'invalid line count'}
     end
   end
 
-  defp convert_row([first_digit|rest] = input) do
-    len = String.length(first_digit)
-    if rem(len, 3) == 0 and
-       Enum.all?(rest, fn(s) -> String.length(s) == len end) do
+  defp convert_rows([]          , acc), do: {:ok, Enum.reverse(acc)}
+  defp convert_rows([first|rest], acc)  do
+    with {:ok, result} <- convert_row(first) do
+      convert_rows(rest, [result|acc])
+    else
+      err -> err
+    end
+  end
+
+  defp convert_row(input) do
+    if check_matrix_width(input) do
       result =
         input
-          |> Enum.map(&String.graphemes/1)
-          |> convert_digits([])
+        |> Enum.map(&String.graphemes/1)
+        |> ocr_digits([])
+        |> Enum.join
       {:ok, result}
     else
       {:error, 'invalid column count'} 
     end
   end
 
-  defp convert_digits([[],[],[],[]], acc) do
-    acc |> Enum.reverse |> Enum.join
+  defp check_matrix_width([top_line|rest]) do
+    len = String.length(top_line)
+    rem(len, 3) == 0 and Enum.all?(rest, &(String.length(&1) == len))
   end
 
-  defp convert_digits(lines, acc) do
-    string =
-      lines
-      |> Enum.map(fn (list) -> Enum.take(list, 3) end)
-      |> Enum.join
-    result = @conversions[string] || "?"
-    rest = Enum.map(lines, fn (list) -> Enum.drop(list, 3) end)
-    convert_digits(rest, [result|acc])
+  defp ocr_digits([[],[],[],[]], acc), do: Enum.reverse(acc)
+  defp ocr_digits(input        , acc)  do
+    this_digit = Enum.map(input, &(Enum.take(&1, 3)))
+    rest       = Enum.map(input, &(Enum.drop(&1, 3)))
+    converted  = @conversions[Enum.join(this_digit)] || "?"
+    ocr_digits(rest, [converted|acc])
   end
 
 end
