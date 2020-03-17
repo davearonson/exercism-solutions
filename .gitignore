@@ -1,10 +1,11 @@
-*test*.*
-*.pyc
 !daves_*test*.*
-hint_*.md
-.version
-README.md
+*.pyc
+*test*.*
 .DS_Store
 .coverage
 .exercism
+.formatter.exs
+.version
+README.md
 __pycache__
+hint_*.md

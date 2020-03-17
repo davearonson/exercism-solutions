@@ -1,0 +1,56 @@
+What I Tested and Why:
+
+- It takes an arg, so test that that arg is used properly.
+
+- The arg is optional, so test that what is supposed to happen when
+  that arg is not given, happens then.
+
+- The optionalness could possibly be misinterpreted by the
+  user/caller, so also test what happens with None, or the particular
+  type's version of that, in this case an empty string.
+
+- If one wants to be absolutely robust, one could include testing what
+  happens when passed a non-string, but for this purpose that's
+  overkill.
+
+
+Comparison to Exercism's Tests:  They also tested with a *different*
+name (i.e., that it works with both Alice and Bob.  This makes sense,
+to make sure it's not just keying off the presence or absence of the
+argument.  This may get important when we explore "smart-ass ping-pong
+pairing", he said foreshadowingly.  However, they did not test with
+None or "", for which I can't blame them too much, they're just
+assuming we're clear on the concept, which is OK in their context, but
+often not so much in the real world.
+
+
+Difficulties:
+
+- Finding the right syntax for a trailing conditional (see "Other
+  Learnings").  Settled for a non-trailing one-liner (frowned on in
+  Ruby, but prolly 'cuz trailing is easy there).
+
+
+Main Learnings:
+
+- How Python handles optional args (basically same as Ruby)
+
+- How Python handles string interpolation (as of 3.6, precede string
+  with f, enclose value in {})
+
+
+Other Learnings:
+
+- Stumbled across something about the dangers of "myvar == None", as
+  opposed to "myvar is None".  Use "is", unless myvar is of some class
+  that has overridden __eq__, taking into account the possibility of
+  being compared to None.  I found this at:
+  https://www.pythoncentral.io/python-null-equivalent-none/
+
+- Tried to use a trailing conditional, i.e., "do this if that" as is
+  very common in Ruby, in this case, 'name = "you" if name is None or
+  name == ""'.  But Python won't let you do a trailing if with no
+  else.  See details at:
+  https://stackoverflow.com/questions/11880430/how-to-write-inline-if-statement-for-print
+  
+

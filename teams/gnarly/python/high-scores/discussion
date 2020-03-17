@@ -1,0 +1,249 @@
+Okay guys, here's my contribution to the discussion.  Please contribute yours if you think this whole thing is of use.  If you just haven't had time, or are too confused to make enough progress on it to have anything to contribute, let me know, we can adjust the schedule accordingly, I can explain stuff you're not yet understanding, etc., be it about Python, testing, programming, whatever.  If you *don't* think this whole thing is of use, again, just let me know, we can figure out something else, or I can just leave you to explore on your own and I'll be around to answer any questions.
+
+
+What I Tested and How:
+
+There are a few things we need to do, so let's look at what to test for each of them.  Each one will need a basic test case, and Exercism's test suites generally include a *second* basic test case just to make sure we're not cheating and always returning the same thing, or keying off something simple to return some constant.  
+
+We *could* also ask ourselves, what should it do if some smartaleck passes it something other than an array of numbers, or an array with something other than numbers in it?  But IMHO this time that's overkill.  An empty array, however, is perfectly reasonable, as it represents the state of a fresh machine, that hasn't been played (or one that has been reset).
+
+So:
+
+- For testing access to the scores, make an array of numbers, create a HighScores object initialized with that, get the scores from the object, and assert you get back the original array, in the same order.  Do this with two arrays that have numbers in them... and an empty array.
+
+- For testing getting the latest, make an array of numbers, create a HighScore object initialized with that, get the latest score, and assert that you get the last element in the array.  Again, do this with two different arrays of numbers, ideally ending with different numbers... and an empty array.  But what should we get back in the case of an empty array?  Exercism's suite and README don't say, so IMHO None is a good answer.  0 or -1 or some other such value would also be reasonable.
+
+- For testing the personal best, make an array, make a HighScore initted with that, get the personal_best from that, and assert that you get the highest element in the array.  Again, do this with two different number-arrays, ideally having different highest elements, and an empty array (again, returning None, 0, -1, or some such thing, ideally being *consistent* with how you treated "latest").
+
+- For testing the personal top three, now it gets a bit trickier.  As you may have guessed, create HighScores and retrieve personal_top_three from it, asserting you get the right results, with at least two arrays of at least three numbers each, and an empty.  But now what do we do with an empty array?  Should it still return None?  Now that we're getting an array of answer, IMHO an empty array makes sense.  And what about an array that has only one or two elements?  It seems to me that this should return the array of scores, though be careful to sort them.  And what if there is a tie, even a three-way top-score tie?  IMHO all instances of the tying score (up to 3 scores total) should be returned.  But there are many different cases that should be tested here, like [1, 3, 2, 3, 4, 3] (returning [4,3,3]), [3, 1, 3, 2, 3] (returning [3,3,3]), and so on.
+
+To implement the above tests, here is my test suite, using theoptional "declare classs to group them together" technique:
+
+===8<---cut-here---
+
+import pytest
+
+from high_scores import HighScores
+
+class Test_scores_access:
+
+    def test_basic(self):
+        array = [17, 42, 23, 0]
+        assert HighScores(array).scores == array
+
+    def test_alternate(self):
+        array = [17, 42, 23, 0, 69]
+        assert HighScores(array).scores == array
+
+    def test_with_none(self):
+        array = []
+        assert HighScores(array).scores == array
+
+class Test_latest_method:
+
+    def test_basic(self):
+        array = [17, 42, 23, 0]
+        assert HighScores(array).latest() == 0
+
+    def test_alternate(self):
+        array = [17, 42, 23, 0, 69]
+        assert HighScores(array).latest() == 69
+
+    def test_with_none(self):
+        assert HighScores([]).latest() == None
+
+class Test_personal_best_method:
+
+    def test_basic(self):
+        array = [17, 42, 23, 0]
+        assert HighScores(array).personal_best() == 42
+
+    def test_alternate(self):
+        array = [17, 69, 42, 23, 0]
+        assert HighScores(array).personal_best() == 69
+
+    def test_with_none(self):
+        assert HighScores([]).personal_best() == None
+
+class Test_personal_top_three_method:
+
+    def test_basic(self):
+        array = [17, 42, 23, 0, 86, 69]
+        assert HighScores(array).personal_top_three() == [86, 69, 42]
+
+    def test_alternate(self):
+        array = [17, 42, 23, 72, 86, 69]
+        assert HighScores(array).personal_top_three() == [86, 72, 69]
+
+    def test_with_first_place_3_way_tie(self):
+        array = [17, 69, 42, 69, 26, 69, 42]
+        assert HighScores(array).personal_top_three() == [69, 69, 69]
+
+    def test_with_first_place_2_way_tie(self):
+        array = [17, 69, 42, 39, 26, 69, 42]
+        assert HighScores(array).personal_top_three() == [69, 69, 42]
+
+    def test_with_second_place_3_way_tie(self):
+        array = [17, 69, 42, 69, 86, 69, 42]
+        assert HighScores(array).personal_top_three() == [86, 69, 69]
+
+    def test_with_only_three(self):
+        array = [42, 86, 69]
+        expected = sorted(array, reverse = True)
+        assert HighScores(array).personal_top_three() == expected
+
+    def test_with_only_two(self):
+        array = [42, 69]
+        expected = sorted(array, reverse = True)
+        assert HighScores(array).personal_top_three() == expected
+
+    def test_with_only_one(self):
+        array = [42]
+        assert HighScores(array).personal_top_three() == array
+
+    def test_with_none(self):
+        array = []
+        assert HighScores(array).personal_top_three() == array
+
+===8<---cut-here---
+
+Do you have any questions about this test suite?  If you haven't yet seen how to create an object from a class, pass it initialization parameters, and call a method on it, these are examples.  
+
+
+Comparison to Exercism's Test Suite:
+
+First, here's theirs:
+
+===8<---cut-here---
+
+import unittest
+
+from high_scores import HighScores
+
+
+# Tests adapted from `problem-specifications//canonical-data.json` @ v4.0.0
+
+
+class HighScoreTest(unittest.TestCase):
+    def test_list_of_scores(self):
+        scores = [30, 50, 20, 70]
+        expected = [30, 50, 20, 70]
+        self.assertEqual(HighScores(scores).scores, expected)
+
+    def test_latest_score(self):
+        scores = [100, 0, 90, 30]
+        expected = 30
+        self.assertEqual(HighScores(scores).latest(), expected)
+
+    def test_personal_best(self):
+        scores = [40, 100, 70]
+        expected = 100
+        self.assertEqual(HighScores(scores).personal_best(), expected)
+
+    def test_personal_top_three_from_a_long_list(self):
+        scores = [10, 30, 90, 30, 100, 20, 10, 0, 30, 40, 40, 70, 70]
+        expected = [100, 90, 70]
+        self.assertEqual(HighScores(scores).personal_top_three(), expected)
+
+    def test_personal_top_three_highest_to_lowest(self):
+        scores = [20, 10, 30]
+        expected = [30, 20, 10]
+        self.assertEqual(HighScores(scores).personal_top_three(), expected)
+
+    def test_personal_top_three_when_there_is_a_tie(self):
+        scores = [40, 20, 40, 30]
+        expected = [40, 40, 30]
+        self.assertEqual(HighScores(scores).personal_top_three(), expected)
+
+    def test_personal_top_three_when_there_are_less_than_3(self):
+        scores = [30, 70]
+        expected = [70, 30]
+        self.assertEqual(HighScores(scores).personal_top_three(), expected)
+
+    def test_personal_top_three_when_there_is_only_one(self):
+        scores = [40]
+        expected = [40]
+        self.assertEqual(HighScores(scores).personal_top_three(), expected)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+===8<---cut-here---
+
+So what are the differences?
+
+- Oddly enough, this time they did NOT do the "test with an alternate good input" strategy, for the basic concept nor many of the edge cases, such as different sorts of ties.  This difference isn't terribly surprising, as most of these exercises are written by different people.
+
+- They also didn't cover the empty case at all, which I consider a rather glaring omission, given that it could easily happen in the real-world use-case they're trying to model.
+
+
+My Code
+
+What I came up with is fairly simple:
+
+===8<---cut-here---
+
+class HighScores:
+
+    def __init__(self, scores):
+        # could possibly insert some bulletproofing here to make sure that
+        # scores is an array of non-negative integers -- not bothering now.
+        self.scores = scores
+
+    def latest(self):
+        return self.scores[-1] if len(self.scores) > 0 else None
+
+    def personal_best(self):
+        return max(self.scores) if len(self.scores) > 0 else None
+
+    def personal_top_three(self):
+        return sorted(self.scores, reverse = True)[:3]
+
+===8<---cut-here---
+
+If you haven't had the time to go look up how to declare a class in Python, this is an example (as are the sections of my test suite).  Broken down, with some things to note:
+
+- We're declaring a class called HighScores (as you may have guessed from the tests).
+  
+- __init__ is the object initialization function.  You get to decide how many arguments it takes.  This one takes only one, called "scores".  It is required, which you can tell from the lack of an "=" and default value.  It gets stored in an "instance variable" (something this object will store, and can refer to in other methods), also called "scores".  This may seem like a name conflict, but the instance variable version will always be preceded by "self." to distinguish it.
+
+- This instance variable can be retrieved by other things (such as our tests).  That's how the tests in my Test_scores_access can get at it.  (Python has no concept of "private" things.  Anything you don't want people accessing, whether to read or write, is preceded by underscores, but that is purely a convention.  People are free to ignore this warning sign and do as they please.)
+
+- We are declaring three methods, called latest, personal_best, and personal_top_three, which retrieve various parts of that "self.scores" instance variable.
+
+- latest simply returns the last score.  The notation [-1] means the last item in an array.  As you may have guessed, -2 would get us the second to last item, and so on.
+
+- personal_best asks Python to get it the maximum value out of the array, pretty straightforward.  However, note the syntax, max(array), and likewise sorted(array) in personal_top_three.  While most languages that claim to support OO would make these methods on the array, so they'd be called like array.max or array.sorted, Python is rather inconsistent about this.  So, if you try typical OO syntax and it doesn't work, if the thing you're trying to do is very common, try this more imperative-ish syntax.
+
+- personal_top_three is more complicated.  First it's asking Python to give it a sorted version of the array (as opposed to putting the array itself in sorted order), *in reverse order* (i.e., highest first), and then taking the first three items.  Keep reading for some further explanation of how this works.
+
+- Note the "reverse = True" on sorted.  That's an example of keyword arguments (aka "kwargs"), very handy and generally optional.  You can use these to create a method that will do things differently depending on the options passed, or lack thereof -- they usually have defaults, which are often impemented as keyword arguments.
+
+- Note the [:3] in personal_top_three.  That's an example of "slicing".  Python lets you extract a piece of an array by specifying the array index to start at (defaulting to 0), the first one *not* to include (yeah, it's confusing, think of it as "to but not including", defaulting to taking the whole thing), and if you really want to get fancy, the steps to jump by.  So you can tell it things like "start at 2 and get me every third one, stopping before you get to spot number 46", as array[2:46:3].  I think there's something you can use a fourth number for but I forget.  There are some more explicit ways to do this, with a "slice object".  If you really care, you can Google Python slice.  Might be overkill right now, but it may come in handy eventually.
+
+- The first two use one-line conditionals.  These *could* have each been written with the standard syntax of:
+
+        if this
+            that
+        else
+            the_other_thing
+        end
+
+but they're so short, it's worthwhile (and still clear) to use one-liners.
+
+- For whatever reason, Python does not have the "ternary" operator you may have seen elsewhere.  "X if Y else Z" is equivalent to "Y ? X : Z" in C/C++, Ruby, etc.
+
+
+What I Learned:
+
+- Python doesn't have the ternary operator, nor "if X then Y else Z", only "Y if X else Z".  (I learned last time that it doesn't have simply "Y if X", with no else-clause.)
+
+- The existence of the "reverse" kwarg on sorted().
+
+
+Difficulties:
+
+- Finding about Python's lack of ternary, or of standard-order one-line if/then/else.
+
+- Remembering Python's "slice" syntax (mylist[first:onemorethanlast:step]).
