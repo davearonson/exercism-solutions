@@ -1,5 +1,10 @@
 *test*.*
+*.pyc
+!daves_*test*.*
 hint_*.md
 .version
 README.md
 .DS_Store
+.coverage
+.exercism
+__pycache__
