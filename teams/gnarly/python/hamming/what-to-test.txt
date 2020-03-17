@@ -1,0 +1,22 @@
+NORMAL TESTS:
+Two identical one-base strands have distance 0
+Two different one-base strands have distance 1
+There's probably not much value in testing two-base strands
+Two identical three-base strands have distance 0
+Two three-base strands differing at one place (3 ways) have distance 1
+Two three-base strands differing at two places (3 ways) have distance 2
+Two three-base strands differing at all bases have distance 3
+(This should be enough to imply correct behavior with longer strands)
+
+
+LIGHT BULLETPROOFING -- basic valid edge cases
+Two empty strands have distance 0
+
+
+MEDIUM BULLETPROOFING -- invalid edge cases, reasonable errors
+Raises/returns error if strands are not same length
+Raises/returns error if either strand contains an invalid base
+
+
+HEAVY BULLETPROOFING -- deliberately bad input, infrastructure failure, etc.
+Raises/returns error if either strand is not the expected data type (string?)

@@ -1,6 +1,5 @@
 !daves_*test*.*
 *.pyc
-*test*.*
 .DS_Store
 .coverage
 .exercism

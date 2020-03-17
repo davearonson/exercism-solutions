@@ -1,0 +1,51 @@
+BASE CASE:
+Test that we get the right response for:
+- 1x and 2x each trigger number
+- 1x and 2x each product of two trigger numbers (including in order)
+- 1x and 2x product of all three trigger numbers (ditto)
+- number that has no trigger factors, pref w/ at least one as digit(s)
+
+MAKING IT DATA-DRIVEN: hmmmm, gotta think on this
+
+MAKING IT TAKE NOISE LIST PARAMETER:
+- Make it optional, test normal behavior AND, w/ standard FizzBuzz:
+  * test both triggers
+  * test product of both
+  * test multiple of neither; could combine with:
+  * test multiple of now-missing trigger to make sure it went away
+  * test also with non-prime key?
+
+BASIC ITERATOR:
+- test that it gives the correct sequence
+
+CEILINGED ITERATOR:
+- test that it stops at the right place IF GIVEN
+- test that it stops at the right place (default) IF NOT GIVEN
+
+FLOORED ITERATOR:
+- test that it starts at the right place IF GIVEN
+- test that it starts at the right place (default) IF NOT GIVEN
+
+BULLETPROOFING:
+- raise error if:
+  * input is not a positive integer
+  * noise list is not a dictionary
+  * noise list has any keys that are not positive integers
+  * noise list has any values that are not strings
+  * noise list has any keys out of order
+  * noise list has any duplicate keys
+  * noise list has any duplicate values
+  * bounds are not both positive integers
+  * floor > ceiling if only floor, only ceiling, or both given
+- do NOT raise error if noise list has non-prime keys; that's OK
+
+
+Specifically ignoring, outside of bulletproofing:
+- negative numbers
+- zero
+- stepping iterators by any number other than 1
+- non-integers (in which case anything is a multiple of anything)
+- generators
+
+Other assumptions:
+- the function is stateless, so one check does not affect another

@@ -1,0 +1,9 @@
+It takes no arguments, reads nothing from elsewhere, and has no side
+effects, not even i/o.  So, all we _can_ test, is what it returns,
+when called with no args.
+
+By contrast, something that at least took an arg and did something
+with it, or did something with something read from elsewhere, might
+need further tests to confirm proper behavior with different arguments
+or other input.  Likewise, something that has a side effect would need
+a test to check *that*.
