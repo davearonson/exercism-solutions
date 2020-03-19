@@ -13,11 +13,8 @@ defmodule DndCharacter do
 
   @spec modifier(pos_integer()) :: integer()
   def modifier(score) do
-    # can't just div(score - 10, 2), trunc((score - 10) / 2), nor round,
-    # because negative halves round, and negative floats truncate,
-    # *towards zero*, not strictly *down*.  subtracting anything greater than
-    # zero but less than a half, makes the right answer the nearest integer.
-    round((score - 10) / 2 - 0.1)
+    # can't use trunc, as that will *raise* negative halves
+    floor((score - 10) / 2)
   end
 
   @spec ability :: pos_integer()
