@@ -1,18 +1,7 @@
 defmodule ResistorColor do
   @moduledoc false
 
-  @colors [
-    "black",
-    "brown",
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "blue",
-    "violet",
-    "grey",
-    "white"
-  ]
+  @colors ~w(black brown red orange yellow green blue violet grey white)
 
   @spec colors() :: list(String.t())
   def colors do
