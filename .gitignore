@@ -1,3 +1,5 @@
+.formatter.exs
+mix.exs
 *test*.*
 *.pyc
 !daves_*test*.*
