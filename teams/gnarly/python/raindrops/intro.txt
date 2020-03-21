@@ -1,0 +1,96 @@
+This is essentially like a single step in the classic children's
+school math game, and widely-abused/accursed programming interview
+task, FizzBuzz.  Instead of Fizz and Buzz, it's Pling and Plang, plus
+the addition of Plong for multiples of 7.
+
+If you're not as familiar with it as programmers would be, who have
+had it inflicted upon them by numerous interviewers, Exercism's
+explanation is:
+
+===8<---cut-here---
+
+Convert a number to a string, the contents of which depend on the
+number's factors.
+
+* If the number has 3 as a factor, output 'Pling'.
+
+* If the number has 5 as a factor, output 'Plang'.
+
+* If the number has 7 as a factor, output 'Plong'.
+
+* If the number does not have 3, 5, or 7 as a factor, just pass
+  the number's digits straight through.
+
+Examples
+
+* 28's factors are 1, 2, 4, 7, 14, 28.
+  In raindrop-speak, this would be a simple "Plong".
+
+* 30's factors are 1, 2, 3, 5, 6, 10, 15, 30.
+  In raindrop-speak, this would be a "PlingPlang".
+
+* 34 has four factors: 1, 2, 17, and 34.
+  In raindrop-speak, this would be "34".
+
+===8<---cut-here---
+
+(In the children's game, you keep going from 1 up to whenever time
+runs out or the teacher gets tired of it or some reasonably high goal,
+depending on the age and mathematical skills of the children.  As a
+programming interview, it's usually done for 1 to 100, or accepting an
+upper bound and maybe a lower one too.)
+
+Some items to note:
+
+- If the number is not a multiple of 3, 5, or 7, it should be passed
+  back *as a string*.  Note the quotes on the 34 above.
+
+- The order of Pling, Plang, and Plong, within a given output that has
+  more than one, should be in increasing order of the number that
+  triggers the word.  For instance, for 15, it should be "PlingPlang",
+  not "PlangPling", because Pling is for 3, which is less than 5,
+  which is what triggers Plang.
+
+If you want to stretch yourself, you can try these extra goals (the
+syntax is up to you, and remember to write tests for the extra
+functionality):
+
+- Make it very generic, so that only some piece of data, rather than
+  code, would need be changed if we want to make it say, for instance,
+  "Plung" for multiples of 11, and/or "Pleng" for multiples of 13.  Or
+  perhaps if we want to change the old noises entirely, like use
+  Clang, Honk, and Tweet instead of Pling, Plang, and Plong.  Or
+  perhaps if we want to use a completely different set of numbers,
+  like say Foo for 2, Bar for 11, Quux for 23, Wocka for 45 even
+  though it's not prime, etc.
+
+- Make it accept the above data as a parameter.
+
+- Write another function that will call raindrops() over and over,
+  iterating up to some number high enough to prove the concept,
+  passing back the results in a list or tuple.  This high point would
+  be at least 105 (the product of all three "trigger" numbers).
+  
+- Make the above function take an upper limit as a parameter, e.g.,
+  rainstorm(42) (or whatever you choose to call it) would pass back
+  raindrops(n) for the numbers 1 through 42.
+  
+- Make it also take a *lower* bound, so that rainstorm(23, 42) would
+  pass back raindrops(n) for the numbers 23 through 42.
+
+- Make it also take an optional table of numbers and noises, to use
+  instead of Pling/Plang/Plong for 3/5/7.
+
+Feel free to write tests for any of these bits of extra functionality,
+*even if* you're not sure you're going to implement it.  There are
+multi-person styles of programming that involve writing tests for
+someone else to make pass, so test-writing skills are important for
+more than just making sure your own stuff works.  Also, we can always
+just comment them out.  The fact that you may need to do so, should
+give you extra incentive to keep your file of tests well organized, so
+that these tests will be together, separate from the tests about the
+basic required functionality.
+
+Lastly, there are many ways to solve this problem, but if you want to
+make it flexible, I recommend looking into the data structure known in
+Python as a "dictionary", or more generically an "associative array".

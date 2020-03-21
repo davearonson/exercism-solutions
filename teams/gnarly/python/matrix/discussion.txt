@@ -1,0 +1,33 @@
+What to Test:
+
+- Test that it gives correct results (row and col) for a simple
+  matrix; 3x3 should do fine, testing all rows and cols, so we cover
+  first, last, and another.
+
+- Test row and column extraction with minimal sizes: 1xN, Nx1, and
+  1x1.
+
+- Test row and column extraction with some other rectangular but not
+  square matrix, like 3x2 or 4x3 or whatever.
+
+- Test row and column extraction with mixed-width numbers, i.e., some
+  single-digit, some double or more, to make sure we're not just using
+  textual column numbers.
+
+- Test row and column extraction with negatives, floats, and negative
+  floats.
+
+- Test row and column extraction with an invalid index (zero or less).
+  IMHO, it should return an empty list.  None is OK too.
+
+- Test row and column extraction with an empty matrix.  I'm thinking,
+  that means any index is invalid, so again, return empty list or
+  None, whichever we decided on above.
+
+- IMHO we can skip testing what it does if the matrix is not
+  rectangular, or matrix elements are not numbers (string).
+
+
+What I Learned:
+
+- splitlines()

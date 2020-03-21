@@ -1,0 +1,25 @@
+me:
+
+What to test: there are no args, reading of other state, nor
+side-effects, so the only thing left is to test its output.  We COULD
+complicate it and give it some OPTIONAL args, such as a name and
+greeting and test that it greets us properly with those redefined...
+but let's not.
+
+Difficulties:
+
+- Remembering the syntax, including that unlike Ruby, Python needs
+  parens on the function declaration and call, and an explicit return
+  statement.  Solved by remembering, oh yeah....
+
+- Getting it to execute just *my* test suite, not Exercism's.  Solved
+  by looking at its args, obtained with "pytest --help"; see below.
+
+Learned:
+
+- You can either "import foo" and call "foo.bar()", or (learned by
+  experimentation) "from foo import bar" and just call "bar()".
+
+- pytest can be called without args, and it will execute all
+  *_test.py files, but you can explicitly tell it what file(s)
+  to execute instead.
