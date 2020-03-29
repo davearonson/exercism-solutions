@@ -5,12 +5,10 @@ defmodule ArmstrongNumber do
 
   @spec valid?(integer) :: boolean
   def valid?(number) do
-    digits = Integer.to_string(number)
-    num_digits = String.length(digits)
+    digits = Integer.digits(number)
+    num_digits = length(digits)
     check =
       digits
-      |> String.graphemes()
-      |> Enum.map(&String.to_integer/1)
       |> Enum.map(&:math.pow(&1, num_digits))
       |> Enum.sum()
     number == check
