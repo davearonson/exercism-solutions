@@ -1,34 +1,32 @@
 defmodule Dot do
   defmacro graph(ast) do
-    walk(%Graph{}, ast) |> Macro.escape
+    walk(ast, %Graph{}) |> Macro.escape
   end
 
-  defp walk(graph, {:do, {:__block__, _, contents}}) do
-    walk(graph, contents)
+  defp walk({:do, {:__block__, _, contents}}, graph) do
+    walk(contents, graph)
   end
 
-  defp walk(graph, {:do, contents}), do: walk(graph, contents)
+  defp walk({:do, contents}, graph), do: walk(contents, graph)
 
-  defp walk(graph, [item | more]  ), do: walk(graph, item) |> walk(more)
-  defp walk(graph, []             ), do: graph
-  # why doesn't Enum.reduce(list, graph, &walk/2) work,
-  # even after ensuring that it is indeed a list?!
+  defp walk(list, graph) when is_list(list),
+      do: Enum.reduce(list, graph, &walk/2)
 
-  defp walk(_graph, non_tuple) when not is_tuple(non_tuple),
+  defp walk(non_tuple, graph) when not is_tuple(non_tuple),
       do: raise ArgumentError
 
-  defp walk(_graph, missized_tuple) when tuple_size(missized_tuple) != 3,
+  defp walk(missized_tuple, graph) when tuple_size(missized_tuple) != 3,
       do: raise ArgumentError
 
-  defp walk(graph, {:--, [_loc], [{node_a, _, _}, {node_b, _, attrs}]}) do
+  defp walk({:--, [_loc], [{node_a, _, _}, {node_b, _, attrs}]}, graph) do
     %Graph{graph | edges: [{node_a, node_b, make_attrs(attrs)} | graph.edges]}
   end
 
-  defp walk(graph, {:graph, [_loc], attrs}) do
+  defp walk({:graph, [_loc], attrs}, graph) do
     %Graph{graph | attrs: Enum.sort(make_attrs(attrs) ++ graph.attrs)}
   end
 
-  defp walk(graph, {atom, [_loc], attrs}) do
+  defp walk({atom, [_loc], attrs}, graph) do
     %Graph{graph | nodes: Enum.sort([{atom, make_attrs(attrs)} | graph.nodes])}
   end
 
