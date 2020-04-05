@@ -123,6 +123,7 @@ defmodule Forth do
   end
 
   defp do_define([";" | more_input], meaning) do
+    # the need to reverse is not tested by exercism's supplied test suite
     [more_input, Enum.reverse(meaning)]
   end
 
@@ -130,6 +131,7 @@ defmodule Forth do
     do_define(more_input, [token | meaning])
   end
 
+  # this case is not tested by exercism's supplied test suite
   defp do_define([], _meaning), do: raise ArgumentError
 
   @doc """
