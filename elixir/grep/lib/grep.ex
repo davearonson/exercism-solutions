@@ -5,7 +5,7 @@ defmodule Grep do
     [pattern, options] = apply_regex_options(pattern, flag_set)
 
     with {:ok, regex} <- Regex.compile(pattern, options) do
-      grep_files(regex, flag_set, files)
+      grep_all_files(regex, flag_set, files)
     else
       err -> err
     end
@@ -29,15 +29,15 @@ defmodule Grep do
     [pattern, opts]
   end
 
-  defp grep_files(regex, flag_set, files) do
+  defp grep_all_files(regex, flag_set, files) do
     files
-    |> Enum.map(&grep_file(regex, flag_set, &1))
+    |> Enum.map(&grep_one_file(regex, flag_set, &1))
     |> Enum.reject(&is_nil/1)
     |> Enum.join("\n")
     |> ensure_ending_newline
   end
 
-  defp grep_file(regex, flags, filename) do
+  defp grep_one_file(regex, flags, filename) do
     with {:ok, content} <- File.read(filename) do
       lines = matching_lines_in(content, regex, flags)
 
