@@ -23,9 +23,9 @@ defmodule Grep do
   end
 
   defp apply_regex_options(pattern, flags) do
-    opts = if MapSet.member?(flags, "-i"), do: "i", else: ""
+    opts = if "-i" in flags, do: "i", else: ""
     # in elixir regex -x means something different
-    pattern = if MapSet.member?(flags, "-x"), do: "^#{pattern}$", else: pattern
+    pattern = if "-x" in flags, do: "^#{pattern}$", else: pattern
     [pattern, opts]
   end
 
@@ -72,13 +72,13 @@ defmodule Grep do
   end
 
   defp apply_line_flags(flags, {line, number}, filename) do
-    n = if MapSet.member?(flags, "-n"), do: "#{number + 1}:", else: ""
-    f = if MapSet.member?(flags, "multifile"), do: "#{filename}:", else: ""
+    n = if "-n" in flags, do: "#{number + 1}:", else: ""
+    f = if "multifile" in flags, do: "#{filename}:", else: ""
     "#{f}#{n}#{line}"
   end
 
   defp grep_line(regex, flags, {line, _number}) do
-    String.match?(line, regex) == not MapSet.member?(flags, "-v")
+    String.match?(line, regex) == "-v" not in flags
   end
 
   defp ensure_ending_newline(""), do: ""
