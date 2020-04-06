@@ -42,15 +42,12 @@ defmodule Grep do
       lines = matching_lines_in(content, regex, flags)
 
       cond do
-        Enum.empty?(lines) ->
-          nil
+        Enum.empty?(lines) -> nil
 
-        MapSet.member?(flags, "-l") ->
-          # we did more work than needed to get here, oh well
-          filename
+        # we did more work than needed to get here, oh well
+        MapSet.member?(flags, "-l") -> filename
 
-        true ->
-          format_lines(lines, flags, filename)
+        true -> format_lines(lines, flags, filename)
       end
     else
       err -> err
