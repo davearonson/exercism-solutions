@@ -16,7 +16,8 @@ defmodule Dot do
     do: {{}, %Graph{graph | edges: [{a, b, make_attrs(attrs)} | graph.edges]}}
 
   defp handle_node({:graph, [_loc], attrs}, graph),
-    do: {{}, %Graph{graph | attrs: make_attrs(attrs) ++ graph.attrs}}
+    do: {{},
+         %Graph{graph | attrs: Keyword.merge(graph.attrs, make_attrs(attrs))}}
 
   defp handle_node({atom, [_loc], attrs}, graph) when is_atom(atom),
     do: {{}, %Graph{graph | nodes: [{atom, make_attrs(attrs)} | graph.nodes]}}
