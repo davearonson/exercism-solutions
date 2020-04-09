@@ -7,25 +7,21 @@ defmodule Dot do
     |> Macro.escape()
   end
 
-  # just don't hand back the node, cuz we may have handled some sub-nodes
-  defp handle_node(node, graph), do: {:whatever, do_handle_node(node, graph)}
+  # pass block thru unchanged, to let prewalk handle contents; on all others,
+  # return empty ast to prevent prewalk from processing contents further
 
-  defp do_handle_node({:__block__, [_attrs], contents}, graph),
-    do: Enum.reduce(contents, graph, &do_handle_node/2)
+  defp handle_node(n = {:__block__, [_loc], _contents}, graph), do: {n, graph}
 
-  defp do_handle_node({:--, [_loc], [{a, _, _}, {b, _, attrs}]}, graph) do
-    %Graph{graph | edges: [{a, b, make_attrs(attrs)} | graph.edges]}
-  end
+  defp handle_node({:--, [_loc], [{a, _, _}, {b, _, attrs}]}, graph),
+    do: {{}, %Graph{graph | edges: [{a, b, make_attrs(attrs)} | graph.edges]}}
 
-  defp do_handle_node({:graph, [_loc], attrs}, graph) do
-    %Graph{graph | attrs: make_attrs(attrs) ++ graph.attrs}
-  end
+  defp handle_node({:graph, [_loc], attrs}, graph),
+    do: {{}, %Graph{graph | attrs: make_attrs(attrs) ++ graph.attrs}}
 
-  defp do_handle_node({atom, [_loc], attrs}, graph) when is_atom(atom) do
-    %Graph{graph | nodes: [{atom, make_attrs(attrs)} | graph.nodes]}
-  end
+  defp handle_node({atom, [_loc], attrs}, graph) when is_atom(atom),
+    do: {{}, %Graph{graph | nodes: [{atom, make_attrs(attrs)} | graph.nodes]}}
 
-  defp do_handle_node(node, _graph),
+  defp handle_node(node, _graph),
     do: raise(ArgumentError, message: "Dunno how to handle #{inspect(node)}")
 
   defp make_attrs([attrs]) do
