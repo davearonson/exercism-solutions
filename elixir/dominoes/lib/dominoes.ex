@@ -23,8 +23,8 @@ defmodule Dominoes do
 
   # extracted so as not to make a huge ugly "fn" expression inline above
   defp chain_helper(candidate, tail, must_match, must_end) do
-    rest = remove_from(tail, candidate, [])
-    pool = [candidate | rest]
+    # put the candidate at the front
+    pool = [candidate | List.delete(tail, candidate)]
     do_chain(pool, must_match, must_end, [])
   end
 
@@ -56,10 +56,5 @@ defmodule Dominoes do
   end
 
   defp do_chain([], _must_match, _must_end, _rejects), do: false
-
-  defp remove_from([target | tail], target, acc), do: acc ++ tail
-  defp remove_from([]             , _     , acc), do: acc
-  defp remove_from([other  | tail], target, acc),
-    do: remove_from(tail, target, [other | acc])
 
 end
