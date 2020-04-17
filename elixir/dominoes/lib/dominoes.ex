@@ -19,14 +19,9 @@ defmodule Dominoes do
   end
 
   defp any_chains?(pool, must_match, must_end),
-    do: Enum.any?(pool, &chain_helper(&1, pool, must_match, must_end))
-
-  # extracted so as not to make a huge ugly "fn" expression inline above
-  defp chain_helper(candidate, tail, must_match, must_end) do
-    # put the candidate at the front
-    pool = [candidate | List.delete(tail, candidate)]
-    do_chain(pool, must_match, must_end, [])
-  end
+    do: Enum.any?(pool,
+                  &do_chain([&1 | List.delete(pool, &1)],
+                            must_match, must_end, []))
 
   # if we're down to one, with no rejects, and it matches precisely, either
   # forward or backward, yes we can chain.  i'm doing it this way rather than
