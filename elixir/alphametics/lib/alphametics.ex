@@ -17,55 +17,84 @@ defmodule Alphametics do
   """
   @spec solve(puzzle) :: solution | nil
   def solve(puzzle) do
-    letters =
-      puzzle
-      |> String.graphemes
-      |> Enum.filter(&(&1 >= "A" and &1 <= "Z"))
-      |> Enum.uniq
-    nonzero =
-      puzzle
-      |> String.split(" == ")
-      |> Enum.map(&String.graphemes/1)
-      |> Enum.map(&hd/1)
-    digits =
-      (0..9)
-      |> Enum.to_list
-      |> Enum.map(&Integer.to_string/1)
+    letters = extract_letters(puzzle)
+    nonzero = extract_nonzero_letters(puzzle)
+    make_solutions(Enum.count(letters))
+    |> Enum.find_value(&solves(letters, &1, puzzle, nonzero))
+  end
+
+  defp extract_letters(puzzle) do
     puzzle
-    |> find_solution(letters, nonzero, digits)
+    |> String.graphemes
+    |> Enum.filter(&(&1 >= "A" and &1 <= "Z"))
+    |> Enum.uniq
   end
 
-  defp find_solution(puzzle, letters, nonzero, digits) do
-    Enum.find_value(digits,
-                    &do_solve(puzzle, letters, nonzero,
-                              # doing &1 separately and not constructing
-                              # a list shaves about 10% off the time!
-                              &1, List.delete(digits, &1)))
+  defp extract_nonzero_letters(puzzle) do
+    puzzle
+    |> String.split(" == ")
+    |> Enum.map(&String.graphemes/1)
+    |> Enum.map(&hd/1)
+    |> Enum.uniq
   end
 
-  # if we're out of letters, see if it's right
-  defp do_solve(puzzle, [], _, _, _) do
-    {res, _} = Code.eval_string(puzzle)
-    if res, do: %{}, else: nil
+  defp make_solutions(len) do
+    (0..9)
+    |> Enum.to_list
+    |> Enum.map(&Integer.to_string/1)
+    |> perms(len)
   end
 
-  # if the current letter is forbidden to be nonzero,
-  # and the current digit is zero, this branch is a dead end
-  defp do_solve(_, [letter | _], [letter, _], "0", _), do: nil 
-  defp do_solve(_, [letter | _], [_, letter], "0", _), do: nil
-
-  # else recurse; if the final version works, add current letter & digit
-  defp do_solve(puzzle, [letter | more_letters], nonzero,
-                digit, more_digits) do
-    new_puzzle = String.replace(puzzle, letter, digit)
-    sol = find_solution(new_puzzle, more_letters, nonzero, more_digits)
-    if is_nil(sol) do
-      sol
-      else
-        Map.put(sol,
-                letter |> String.to_charlist |> hd,
-                digit |> String.to_integer)
-      end
+  defp perms([]  , _), do: [[]]
+  defp perms(_   , 0), do: [[]]
+  defp perms(list, n) do
+    Stream.flat_map(list, &prepend_to_subperms(&1, list -- [&1], n - 1))
   end
 
+  defp prepend_to_subperms(first, list, n) do
+    Stream.map(perms(list, n), &([first | &1]))
+  end
+
+  defp solves(letters, digits, puzzle, nonzero) do
+    if legit(letters, digits, nonzero) do
+      translated = translate(puzzle, letters, digits)
+      {res, _} = Code.eval_string(translated)
+      if res, do: fixup_solution(letters, digits), else: nil
+    else
+      nil
+    end
+  end
+
+  defp legit(letters, digits, nonzero) do
+    zeroes =
+      Enum.zip(letters, digits)
+      |> Enum.filter(&(elem(&1, 1) == "0"))
+    if Enum.any?(zeroes) do
+      zero =
+        zeroes
+        |> hd
+        |> elem(0)
+      zero not in nonzero
+    else
+      true
+    end
+  end
+
+  defp translate(puzzle, [], []), do: puzzle
+  defp translate(puzzle, [letter | letters], [digit | digits]) do
+    translate(String.replace(puzzle, letter, digit), letters, digits)
+  end
+
+  defp fixup_solution(letters, digits) do
+    lets =
+      letters
+      |> Enum.map(&String.to_charlist/1)
+      |> Enum.map(&hd/1)
+    digs =
+      digits
+      |> Enum.map(&String.to_integer/1)
+    lets
+    |> Enum.zip(digs)
+    |> Map.new
+  end
 end
