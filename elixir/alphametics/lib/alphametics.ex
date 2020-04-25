@@ -44,9 +44,15 @@ defmodule Alphametics do
     |> Enum.map(&Integer.to_string/1)
   end
 
+  defp find_solution(puzzle, [], _, _), do: check_solution(puzzle)
   defp find_solution(puzzle, letters, nonzero, digits) do
     Enum.find_value(digits,
                     &do_solve(puzzle, letters, nonzero, &1, digits -- [&1]))
+  end
+
+  defp check_solution(puzzle) do
+    {res, _} = Code.eval_string(puzzle)
+    if res, do: %{}, else: nil
   end
 
   defp do_solve(puzzle, [letter | more_letters], nonzero, digit, more_digits) do
@@ -63,10 +69,7 @@ defmodule Alphametics do
     end
   end
 
-  defp do_solve(puzzle, [], _, _, _) do
-    {res, _} = Code.eval_string(puzzle)
-    if res, do: %{}, else: nil
-  end
+  defp do_solve(puzzle, [], _, _, _), do: check_solution(puzzle)
 
   defp to_char(letter) do
     letter
