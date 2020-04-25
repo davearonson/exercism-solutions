@@ -59,12 +59,9 @@ defmodule Alphametics do
     if res, do: fixup_solution(acc), else: nil
   end
 
-  defp translate(puzzle, acc),
-    do: do_translate(puzzle, Map.keys(acc), Map.values(acc))
-
-  defp do_translate(puzzle, [], _), do: puzzle
-  defp do_translate(puzzle, [letter | letters], [digit | digits]) do
-    do_translate(String.replace(puzzle, letter, digit), letters, digits)
+  defp translate(puzzle, acc) do
+    Enum.reduce(acc, puzzle,
+                fn {let, dig}, puz -> String.replace(puz, let, dig) end)
   end
 
   defp fixup_solution(map) do
