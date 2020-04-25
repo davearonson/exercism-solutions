@@ -19,8 +19,9 @@ defmodule Alphametics do
   def solve(puzzle) do
     find_solution(puzzle,
                   extract_letters(puzzle),
-                  extract_nonzero_letters(puzzle),
-                  digits_list())
+                  extract_non0_letters(puzzle),
+                  digits_list(),
+                  %{})
   end
 
   defp extract_letters(puzzle) do
@@ -30,7 +31,7 @@ defmodule Alphametics do
       |> Enum.uniq
   end
 
-  defp extract_nonzero_letters(puzzle) do
+  defp extract_non0_letters(puzzle) do
     puzzle
       |> String.split(" ")
       |> Enum.map(&String.graphemes/1)
@@ -44,37 +45,48 @@ defmodule Alphametics do
     |> Enum.map(&Integer.to_string/1)
   end
 
-  defp find_solution(puzzle, [], _, _), do: check_solution(puzzle)
-  defp find_solution(puzzle, letters, nonzero, digits) do
+  defp find_solution(puzzle, [], _, _, acc), do: check_solution(puzzle, acc)
+  defp find_solution(puzzle, letters, non0, digits, acc) do
     Enum.find_value(digits,
-                    &do_solve(puzzle, letters, nonzero, &1, digits -- [&1]))
+                    &do_solve(puzzle, letters, non0, &1, digits -- [&1], acc))
   end
 
-  defp check_solution(puzzle) do
-    {res, _} = Code.eval_string(puzzle)
-    if res, do: %{}, else: nil
+  defp check_solution(puzzle, acc) do
+    {res, _} =
+      puzzle
+      |> translate(acc)
+      |> Code.eval_string
+    if res, do: fixup_solution(acc), else: nil
   end
 
-  defp do_solve(puzzle, [letter | more_letters], nonzero, digit, more_digits) do
-    if digit == "0" and letter in nonzero do
-      nil
-    else
-      new_puzzle = String.replace(puzzle, letter, digit)
-      soln = find_solution(new_puzzle, more_letters, nonzero, more_digits)
-      if soln do
-        Map.put(soln, to_char(letter), String.to_integer(digit))
-      else
-        nil
-      end
-    end
+  defp translate(puzzle, acc),
+    do: do_translate(puzzle, Map.keys(acc), Map.values(acc))
+
+  defp do_translate(puzzle, [], _), do: puzzle
+  defp do_translate(puzzle, [letter | letters], [digit | digits]) do
+    do_translate(String.replace(puzzle, letter, digit), letters, digits)
   end
 
-  defp do_solve(puzzle, [], _, _, _), do: check_solution(puzzle)
+  defp fixup_solution(map) do
+    for {letter, digit} <- map, into: %{},
+      do: {to_char(letter), String.to_integer(digit)}
+  end
 
   defp to_char(letter) do
     letter
     |> String.to_charlist
     |> hd
   end
+
+  defp do_solve(puzzle, [let | more_lets], non0, digit, more_digits, acc) do
+    if digit == "0" and let in non0 do
+      nil
+    else
+      find_solution(puzzle, more_lets, non0, more_digits,
+                    Map.put(acc, let, digit))
+    end
+  end
+
+  defp do_solve(puzzle, [], _, _, _, acc), do: check_solution(puzzle, acc)
 
 end
