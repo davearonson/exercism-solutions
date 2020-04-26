@@ -1,4 +1,5 @@
 defmodule Alphametics do
+  defstruct [:addends, :sum, :nonzeros]
   @type puzzle :: binary
   @type solution :: %{required(?A..?Z) => 0..9}
 
@@ -17,73 +18,60 @@ defmodule Alphametics do
   """
   @spec solve(puzzle) :: solution | nil
   def solve(puzzle) do
-    find_solution(puzzle,
-                  extract_letters(puzzle),
-                  extract_non0_letters(puzzle),
-                  digits_list(),
+    {struct, letters} = parse(puzzle)
+    find_solution(struct,
+                  letters,
+                  Enum.to_list(0..9),
                   %{})
   end
 
-  defp extract_letters(puzzle) do
-    puzzle
-      |> String.graphemes
-      |> Enum.filter(&(&1 >= "A" and &1 <= "Z"))
-      |> Enum.uniq
-  end
-
-  defp extract_non0_letters(puzzle) do
-    puzzle
+  defp parse(puzzle) do
+    # make them charlists to handle them as lists, for easy mapping to numbers,
+    # and reverse them so we can destructure the list to sum and addends
+    words =
+      puzzle
       |> String.split(" ")
-      |> Enum.map(&String.graphemes/1)
+      |> Enum.filter(fn str -> String.match?(str, ~r/^[A-Z]+$/) end)
+      |> Enum.map(&String.to_charlist/1)
+      |> Enum.reverse
+    [sum | addends] = words
+    nonzeros =
+      words
       |> Enum.map(&hd/1)
-      |> Enum.filter(&(&1 >= "A" and &1 <= "Z"))
+      |> Enum.uniq
+    letters =
+      words
+      |> List.flatten
+      |> Enum.uniq
+    {%__MODULE__{addends: addends, sum: sum, nonzeros: nonzeros}, letters}
   end
 
-  defp digits_list do
-    (0..9)
-    |> Enum.to_list
-    |> Enum.map(&Integer.to_string/1)
-  end
-
-  defp find_solution(puzzle, [], _, _, acc), do: check_solution(puzzle, acc)
-  defp find_solution(puzzle, letters, non0, digits, acc) do
+  defp find_solution(puzzle, [], _, acc), do: check_solution(puzzle, acc)
+  defp find_solution(puzzle, letters, digits, acc) do
     Enum.find_value(digits,
-                    &do_solve(puzzle, letters, non0, &1, digits -- [&1], acc))
+                    &do_solve(puzzle, letters, &1, digits -- [&1], acc))
   end
 
   defp check_solution(puzzle, acc) do
-    {res, _} =
-      puzzle
-      |> translate(acc)
-      |> Code.eval_string
-    if res, do: fixup_solution(acc), else: nil
+    try_sum =
+      puzzle.addends
+      |> Enum.map(&to_number(&1, acc))
+      |> Enum.reduce(&Kernel.+/2)
+    if try_sum == to_number(puzzle.sum, acc), do: acc  # else implicitly nil
   end
 
-  defp translate(puzzle, acc) do
-    Enum.reduce(acc, puzzle,
-                fn {let, dig}, puz -> String.replace(puz, let, dig) end)
+  defp to_number(chars, acc) do
+    chars
+    |> Enum.map(&acc[&1])
+    |> Integer.undigits
   end
 
-  defp fixup_solution(map) do
-    for {letter, digit} <- map, into: %{},
-      do: {to_char(letter), String.to_integer(digit)}
+  defp do_solve(puzzle, [let | more_lets], digit, more_digits, acc) do
+    if digit > 0 or let not in puzzle.nonzeros do
+      find_solution(puzzle, more_lets, more_digits, Map.put(acc, let, digit))
+    end  # else implicitly nil
   end
 
-  defp to_char(letter) do
-    letter
-    |> String.to_charlist
-    |> hd
-  end
-
-  defp do_solve(puzzle, [let | more_lets], non0, digit, more_digits, acc) do
-    if digit == "0" and let in non0 do
-      nil
-    else
-      find_solution(puzzle, more_lets, non0, more_digits,
-                    Map.put(acc, let, digit))
-    end
-  end
-
-  defp do_solve(puzzle, [], _, _, _, acc), do: check_solution(puzzle, acc)
+  defp do_solve(puzzle, [], _, _, acc), do: check_solution(puzzle, acc)
 
 end
