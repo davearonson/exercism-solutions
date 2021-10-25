@@ -1,9 +1,10 @@
-# Poker
+# Clock
 
-Pick the best hand(s) from a list of poker hands.
+Implement a clock that handles times without dates.
 
-See [wikipedia](https://en.wikipedia.org/wiki/List_of_poker_hands) for an
-overview of poker hands.
+You should be able to add and subtract minutes to it.
+
+Two clocks that represent the same time should be equal to each other.
 
 ## Running tests
 
@@ -42,7 +43,7 @@ out there where answers might be found.
 
 ## Source
 
-Inspired by the training course from Udacity. [https://www.udacity.com/course/viewer#!/c-cs212/](https://www.udacity.com/course/viewer#!/c-cs212/)
+Pairing session with Erin Drummond [https://twitter.com/ebdrummond](https://twitter.com/ebdrummond)
 
 ## Submitting Incomplete Solutions
 It's possible to submit an incomplete solution so you can see how others have completed the exercise.

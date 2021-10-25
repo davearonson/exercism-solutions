@@ -45,24 +45,30 @@ defmodule Bowling do
       when last + roll > @pins_max,
       do: @too_many_pins_error
 
-  # after final strike, strike in 11th frame, and 12th --
+  # after final strike, and strike on both bonus ball --
   # NOT TESTED by Exercism's supplied test suite
-  def roll(%{frame: 13, rolls: [@pins_max | [@pins_max | _rest]]}, _),
-    do: @game_over_error
+  def roll(%{frame: frame, rolls: [@pins_max | [@pins_max | _rest]]}, _)
+      when frame == @frame_max + 3,
+      do: @game_over_error
 
   # after final strike, and non-strike (and whatever, even spare) in 11th frame
-  def roll(%{frame: 12, rolls: [_last | [second | _rest]]}, _)
-      when second != @pins_max,
+  def roll(%{frame: frame, rolls: [_last | [second | _rest]]}, _)
+      when frame == @frame_max + 2 and second != @pins_max,
       do: @game_over_error
 
   # after final spare, and its bonus roll
-  def roll(%{first_roll: false, frame: 11, rolls: [_ | [spare1 | [spare2]]]}, _)
-      when spare1 + spare2 == @pins_max,
+  def roll(%{first_roll: false,
+             frame:      frame,
+             rolls:      [_ | [spare1 | [spare2]]]},
+           _)
+      when frame == @frame_max + 1 and spare1 + spare2 == @pins_max,
       do: @game_over_error
 
   # after normal final frame
-  def roll(%{frame: 11, rolls: [last | [second | _rest]]}, _)
-      when last < @pins_max and last + second < @pins_max,
+  def roll(%{frame: frame, rolls: [last | [second | _rest]]}, _)
+      when frame == @frame_max + 1
+       and last < @pins_max
+       and last + second < @pins_max,
       do: @game_over_error
 
   # strike
@@ -106,21 +112,26 @@ defmodule Bowling do
 
   # awaiting bonus ball for a final spare
   # can't incorporate this into above cuz unstarted won't have last & second
-  def score(%{first_roll: true, frame: 11, rolls: [last | [next | _rest]]})
-      when last + next == @pins_max,
+  def score(%{first_roll: true,
+              frame:      frame,
+              rolls:      [last | [next | _rest]]})
+      when frame == @frame_max + 1 and last + next == @pins_max,
       do: @must_end_error
 
   # awaiting first bonus ball for a final strike
-  def score(%{frame: 11, rolls: [@pins_max | _rest]}),
-    do: @must_end_error
+  def score(%{frame: frame, rolls: [@pins_max | _rest]})
+      when frame == @frame_max + 1,
+      do: @must_end_error
 
   # awaiting second bonus ball for a final strike after 1st was also strike
-  def score(%{frame: 12, rolls: [@pins_max | [@pins_max | _rest]]}),
-    do: @must_end_error
+  def score(%{frame: frame, rolls: [@pins_max | [@pins_max | _rest]]})
+      when frame == @frame_max + 2,
+      do: @must_end_error
 
   # awaiting second bonus ball for a final strike after 1st was normal
-  def score(%{frame: 11, rolls: [_last | [@pins_max | _rest]]}),
-    do: @must_end_error
+  def score(%{frame: frame, rolls: [_last | [@pins_max | _rest]]})
+      when frame == @frame_max + 1,
+      do: @must_end_error
 
   def score(game), do: game.score
 end
