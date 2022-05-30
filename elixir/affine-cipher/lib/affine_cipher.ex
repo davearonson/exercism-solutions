@@ -46,7 +46,7 @@ defmodule AffineCipher do
         encrypted
         |> String.graphemes
         |> Enum.map(&(decode_char(&1, mmi, b)))
-        |> Enum.reject(&is_nil/1)
+        |> Enum.filter(&(&1))
         |> List.to_string
       {:ok, clear}
     else
@@ -54,13 +54,16 @@ defmodule AffineCipher do
     end
   end
 
+  defp find_mmi(a, 26),
+    do: raise ArgumentError, message: "Can't find an MMI for #{a}"
   defp find_mmi(a, cand),
     do: if rem(a * cand, 26) == 1, do: cand, else: find_mmi(a, cand + 1)
 
   defp decode_char(char, mmi, b) do
     <<ascii>> = String.downcase(char)
     cond do
-      ascii in (?a..?z) -> rem(mmi * (ascii - ?a - b + 52), 26) + ?a
+      # use Integer.mod as it will not return negative
+      ascii in (?a..?z) -> Integer.mod(mmi * (ascii - ?a - b), 26) + ?a
       ascii in (?0..?9) -> ascii
       true              -> nil
     end
