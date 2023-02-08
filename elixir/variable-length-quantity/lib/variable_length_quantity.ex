@@ -1,13 +1,14 @@
 defmodule VariableLengthQuantity do
+  import Bitwise
+
   @doc """
   Encode integers into a bitstring of VLQ encoded bytes
   """
-
-  import Bitwise
-
   @spec encode(integers :: [integer]) :: binary
   def encode(integers) do
-    Enum.flat_map(integers, &(do_encode(&1, 0, []))) |> Enum.join
+    integers
+    |> Enum.flat_map(&do_encode(&1, 0, []))
+    |> Enum.join()
   end
 
   defp do_encode(num, bit, acc) when num >= 128,
@@ -21,14 +22,16 @@ defmodule VariableLengthQuantity do
   @spec decode(bytes :: binary) :: {:ok, [integer]} | {:error, String.t()}
   def decode(bytes) do
     bytes
-    |> :binary.bin_to_list
+    |> :binary.bin_to_list()
     |> do_decode([], 0)
   end
 
-  defp do_decode([byte|rest], big_acc, lil_acc) when byte >= 128,
+  defp do_decode([byte | rest], big_acc, lil_acc) when byte >= 128,
     do: do_decode(rest, big_acc, lil_acc * 128 + byte - 128)
-  defp do_decode([byte|rest], big_acc, lil_acc),
+
+  defp do_decode([byte | rest], big_acc, lil_acc),
     do: do_decode(rest, [lil_acc * 128 + byte | big_acc], 0)
+
   defp do_decode([], []     , _lil_acc), do: {:error, "incomplete sequence"}
-  defp do_decode([], big_acc, _lil_acc), do: {:ok, Enum.reverse(big_acc) }
+  defp do_decode([], big_acc, _lil_acc), do: {:ok, Enum.reverse(big_acc)}
 end
