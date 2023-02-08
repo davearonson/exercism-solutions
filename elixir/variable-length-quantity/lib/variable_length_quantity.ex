@@ -7,13 +7,13 @@ defmodule VariableLengthQuantity do
 
   @spec encode(integers :: [integer]) :: binary
   def encode(integers) do
-    Enum.flat_map(integers, &(do_encode(&1, [], 0))) |> Enum.join
+    Enum.flat_map(integers, &(do_encode(&1, 0, []))) |> Enum.join
   end
 
-  defp do_encode(num, acc, bit) when num >= 128,
-    do: do_encode(num >>> 7, [<<bit::1, num::7>> | acc], 1)
+  defp do_encode(num, bit, acc) when num >= 128,
+    do: do_encode(num >>> 7, 1, [<<bit::1, num::7>> | acc])
 
-  defp do_encode(num, acc, bit), do: [<<bit::1, num::7>> | acc]
+  defp do_encode(num, bit, acc), do: [<<bit::1, num::7>> | acc]
 
   @doc """
   Decode a bitstring of VLQ encoded bytes into a series of integers
